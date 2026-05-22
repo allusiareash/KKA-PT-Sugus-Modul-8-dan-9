@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audit Simulator PT SUGUS — Modul 8</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #eef1f5;
+    min-height: 100vh;
+    padding: 24px 16px;
+    color: #1a1a2e;
+  }
+
+  /* ===== WRAPPER ===== */
+  .app-wrapper {
+    max-width: 1280px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    overflow: hidden;
+  }
+
+  /* ===== APP HEADER ===== */
+  .app-header {
+    background: linear-gradient(135deg, #1a3a5f 0%, #0f2440 100%);
+    color: #fff;
+    padding: 24px 32px 20px;
+    position: relative;
+  }
+  .app-header .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+  .app-header .logo-box {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 700; letter-spacing: -1px;
+  }
+  .app-header h1 { font-size: 22px; font-weight: 700; letter-spacing: 0.3px; }
+  .app-header p  { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 3px; }
+  .app-header .badge {
+    position: absolute; top: 24px; right: 32px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px; padding: 4px 14px;
+    font-size: 12px; color: rgba(255,255,255,0.85);
+  }
+
+  /* ===== IDENTITY CARD ===== */
+  .identity-card {
+    background: #f4f7fb;
+    border-bottom: 1px solid #dce3ed;
+    padding: 16px 32px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .identity-card .id-group {
+    display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 160px;
+  }
+  .identity-card label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #5a6a80; }
+  .identity-card input {
+    border: 1px solid #c5d0de;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    background: #fff;
+    color: #1a3a5f;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  .identity-card input:focus { outline: none; border-color: #1a3a5f; }
+
+  /* ===== TABS ===== */
+  .tabs-nav {
+    display: flex;
+    background: #1a3a5f;
+    padding: 0 32px;
+    gap: 2px;
+  }
+  .tab-btn {
+    padding: 12px 22px;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    font-family: inherit;
+  }
+  .tab-btn:hover { color: rgba(255,255,255,0.9); }
+  .tab-btn.active { color: #fff; border-bottom-color: #4da8f5; }
+
+  .tab-pane { display: none; padding: 24px 32px; }
+  .tab-pane.active { display: block; }
+
+  /* ===== SECTION TITLE ===== */
+  .section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a3a5f;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #1a3a5f;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title .ref-badge {
+    font-size: 11px;
+    background: #1a3a5f;
+    color: #fff;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-weight: 600;
+  }
+
+  /* ===== TABLES ===== */
+  .tbl-scroll { overflow-x: auto; margin-bottom: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 600px; }
+  thead th {
+    background: #1a3a5f;
+    color: #fff;
+    padding: 10px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    border: 1px solid #0f2440;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+  tbody td {
+    padding: 0;
+    border: 1px solid #d0d8e4;
+    vertical-align: middle;
+  }
+  tbody tr:nth-child(even) td { background: #f9fbfd; }
+  tbody tr:hover td { background: #eef3f9; }
+  tfoot td {
+    padding: 8px;
+    border: 1px solid #d0d8e4;
+    font-weight: 700;
+    background: #e8eef5;
+    font-size: 12px;
+  }
+
+  /* Cell content wrappers */
+  .cell-ro { padding: 7px 8px; text-align: right; color: #374151; background: #f3f6fa; }
+  .cell-ro.center { text-align: center; }
+  .cell-ro.left { text-align: left; }
+  .cell-auto { padding: 7px 8px; text-align: right; font-weight: 600; color: #1a3a5f; background: #eaf1fb; }
+
+  /* Inputs inside cells */
+  td input[type=text], td input[type=number], td input[type=date] {
+    width: 100%; height: 100%;
+    border: none;
+    padding: 7px 8px;
+    font-size: 12px;
+    font-family: inherit;
+    background: transparent;
+    text-align: right;
+    color: #1a1a2e;
+    outline: none;
+  }
+  td input[type=text].left { text-align: left; }
+  td input:focus { background: #fff8e1; }
+  td input[readonly] { cursor: not-allowed; }
+
+  /* Validation states */
+  td.cell-correct { background: #d4edda !important; }
+  td.cell-correct input { color: #155724; background: transparent; }
+  td.cell-wrong   { background: #f8d7da !important; }
+  td.cell-wrong input { color: #721c24; background: transparent; }
+  .hint-text { display: block; font-size: 9.5px; color: #dc3545; font-weight: 700; padding: 0 8px 4px; }
+
+  /* ===== TOTAL ROW ===== */
+  .total-row td { background: #d6e4f0 !important; font-weight: 700; font-size: 12px; }
+  .total-row td input { font-weight: 700; }
+
+  /* ===== SUBMIT PANEL (inside M2.1.1 tab) ===== */
+  .submit-panel {
+    margin-top: 24px;
+    background: #f4f7fb;
+    border: 1px solid #dce3ed;
+    border-radius: 10px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .submit-left  { display: flex; flex-direction: column; gap: 6px; }
+  .submit-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+  .score-display { display: flex; flex-direction: column; gap: 6px; }
+  .score-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #5a6a80; }
+  .score-value { font-size: 32px; font-weight: 800; color: #1a3a5f; line-height: 1; font-variant-numeric: tabular-nums; }
+  .score-display .score-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #5a6a80; }
+  .score-display .score-value { font-size: 28px; font-weight: 800; color: #1a3a5f; line-height: 1; }
+  .score-bar-wrap { width: 200px; height: 6px; background: #c5d0de; border-radius: 3px; overflow: hidden; }
+  .score-bar-fill { height: 100%; background: #1a3a5f; border-radius: 3px; width: 0; transition: width 0.6s ease; }
+
+  /* ===== WARNING BOX ===== */
+  .warning-box {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #856404;
+    max-width: 420px;
+    line-height: 1.6;
+  }
+  .warning-box ul { margin: 4px 0 0 16px; }
+  .warning-box ul li { margin-bottom: 2px; }
+
+  /* ===== SUBMIT CHECKLIST ===== */
+  .submit-checklist {
+    font-size: 11.5px;
+    color: #5a6a80;
+    line-height: 1.8;
+    text-align: right;
+  }
+  .submit-checklist .chk-item { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+  .submit-checklist .chk-ok   { color: #1a7a4a; font-weight: 600; }
+  .submit-checklist .chk-no   { color: #b0591a; font-weight: 600; }
+
+  .btn-group { display: flex; gap: 10px; }
+  .btn {
+    padding: 11px 24px;
+    border: none;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .btn-check { background: #1a3a5f; color: #fff; }
+  .btn-check:hover { background: #0f2440; }
+  .btn-check:disabled { background: #8a9bb0; cursor: not-allowed; }
+  .btn-pdf   { background: #c0392b; color: #fff; }
+  .btn-pdf:hover { background: #a93226; }
+  .btn-pdf:disabled { background: #c0a0a0; cursor: not-allowed; }
+
+  /* ===== INSTRUCTION BOXES ===== */
+  .info-box {
+    background: #eaf1fb;
+    border-left: 4px solid #1a3a5f;
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: #1a3a5f;
+    line-height: 1.6;
+  }
+
+  /* ===== M2.1.1 Total Row ===== */
+  .m211-total td { background: #1a3a5f !important; color: #fff !important; font-weight: 700; }
+  .m211-total input { color: #fff !important; }
+
+  /* ===== CATATAN PEMERIKSAAN ===== */
+  .catatan-wrap {
+    margin-top: 18px;
+    border: 1.5px dashed #8a9bb0;
+    border-radius: 6px;
+    padding: 14px 16px 12px;
+    background: #fff;
+    transition: background 0.3s;
+  }
+  .catatan-wrap.locked {
+    background: #e9ecef;
+    border-color: #adb5bd;
+  }
+  .catatan-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #1a3a5f;
+    margin-bottom: 8px;
+  }
+  .catatan-label .catatan-icon {
+    width: 18px; height: 18px;
+    background: #1a3a5f;
+    border-radius: 3px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 11px;
+    font-style: normal;
+    flex-shrink: 0;
+  }
+  .catatan-wrap textarea {
+    width: 100%;
+    min-height: 90px;
+    border: none;
+    background: transparent;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #1a1a2e;
+    resize: vertical;
+    outline: none;
+    padding: 0;
+    transition: background 0.3s, color 0.3s;
+  }
+  .catatan-wrap.locked textarea {
+    color: #374151;
+    cursor: not-allowed;
+    resize: none;
+    background: transparent;
+  }
+  .catatan-hint {
+    font-size: 10px;
+    color: #8a9bb0;
+    margin-top: 6px;
+    font-style: italic;
+  }
+  .catatan-wrap.locked .catatan-hint { display: none; }
+</style>
+</head>
+<body>
+<div style="background:#0f2c5a;padding:10px 24px;display:flex;align-items:center;gap:14px;font-family:'DM Sans',sans-serif;position:sticky;top:0;z-index:9999;">
+  <a href="../index.html" style="display:inline-flex;align-items:center;gap:7px;color:rgba(255,255,255,0.8);font-size:13px;font-weight:600;text-decoration:none;padding:6px 14px;border:1px solid rgba(255,255,255,0.25);border-radius:7px;background:rgba(255,255,255,0.07);transition:all 0.2s;">
+    &#8592; Kembali ke Portal
+  </a>
+  <span style="color:rgba(255,255,255,0.4);font-size:12px;">Audit Simulator PT SUGUS &#8212; Modul 8</span>
+</div>
+
+<div class="app-wrapper" id="app-root">
+
+  <!-- APP HEADER -->
+  <div class="app-header">
+    <div class="logo-row">
+      <div class="logo-box">AU</div>
+      <div>
+        <h1>Audit Simulator PT SUGUS</h1>
+        <p>Kertas Kerja Audit — Modul 8: Pajak Penghasilan (PPh 21) &amp; Beban Operasional</p>
+      </div>
+    </div>
+    <span class="badge">Tahun Buku 2023</span>
+  </div>
+
+  <!-- IDENTITY INPUTS -->
+  <div class="identity-card" id="identity-section">
+    <div class="id-group">
+      <label>Nama Mahasiswa</label>
+      <input type="text" id="inp-nama" placeholder="Masukkan nama lengkap...">
+    </div>
+    <div class="id-group">
+      <label>NIM</label>
+      <input type="text" id="inp-nim" placeholder="Masukkan NIM...">
+    </div>
+    <div class="id-group">
+      <label>Kelas</label>
+      <input type="text" id="inp-kelas" placeholder="Contoh: AK-4A">
+    </div>
+    <div class="id-group">
+      <label>Tanggal Pengerjaan</label>
+      <input type="text" id="inp-tanggal" placeholder="dd/mm/yyyy" value="">
+    </div>
+  </div>
+
+  <!-- TABS NAV -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="openTab('pl3',this)">PL3 — Beban Operasional</button>
+    <button class="tab-btn" onclick="openTab('m2',this)">M2 — Utang Pajak</button>
+    <button class="tab-btn" onclick="openTab('m21',this)">M2.1 — Daftar PPh 21</button>
+    <button class="tab-btn" onclick="openTab('m211',this)">M2.1.1 — Setoran PPh 21</button>
+  </div>
+
+  <!-- ============================
+       TAB: PL3 — BEBAN OPERASIONAL
+       ============================ -->
+  <div id="tab-pl3" class="tab-pane active">
+    <div class="section-title">
+      <span class="ref-badge">PL3</span>
+      Daftar Rincian Beban Operasional — Program Audit Reklasifikasi &amp; Eliminasi (PARE)
+    </div>
+    <div class="info-box">
+      <strong>Petunjuk:</strong> Isi kolom <em>PARE Dr</em> dan <em>PARE Cr</em> sesuai hasil audit. Kolom <em>Per Audit</em> terhitung otomatis (Per Klien + PARE Dr − PARE Cr). Biarkan 0 jika tidak ada penyesuaian.
+    </div>
+    <div class="tbl-scroll">
+      <table id="tbl-pl3">
+        <thead>
+          <tr>
+            <th style="width:40px">No</th>
+            <th style="text-align:left; width:220px">Keterangan</th>
+            <th style="width:150px">Per Klien (Rp)</th>
+            <th style="width:140px">PARE Dr (Rp)</th>
+            <th style="width:140px">PARE Cr (Rp)</th>
+            <th style="width:150px">Per Audit (Rp)</th>
+          </tr>
+        </thead>
+        <tbody id="body-pl3"></tbody>
+        <tfoot id="foot-pl3"></tfoot>
+      </table>
+    </div>
+    <div class="catatan-wrap" id="catatan-pl3-wrap">
+      <div class="catatan-label"><span class="catatan-icon">&#9998;</span> Catatan Pemeriksaan:</div>
+      <textarea id="catatan-pl3" placeholder="Tuliskan simpulan atau temuan audit Anda untuk Beban Operasional di sini...&#10;Contoh: Terdapat reklasifikasi beban perjalanan dinas sebesar Rp 60.000.000 karena tidak didukung bukti yang memadai."></textarea>
+      <div class="catatan-hint">&#9432; Kolom ini akan terkunci setelah tombol 'Periksa Jawaban' diklik.</div>
+    </div>
+  </div>
+
+  <!-- ============================
+       TAB: M2 — UTANG PAJAK
+       ============================ -->
+  <div id="tab-m2" class="tab-pane">
+    <div class="section-title">
+      <span class="ref-badge">M2</span>
+      Rincian Utang Pajak
+    </div>
+    <div class="info-box">
+      <strong>Petunjuk:</strong> Isi kolom <em>WP Ref</em>, <em>PARE Dr</em>, dan <em>PARE Cr</em>. Kolom <em>Per Audit</em> terhitung otomatis.
+    </div>
+    <div class="tbl-scroll">
+      <table id="tbl-m2">
+        <thead>
+          <tr>
+            <th style="text-align:left; width:200px">Keterangan</th>
+            <th style="width:100px">WP Ref</th>
+            <th style="width:170px">Per Klien (Rp)</th>
+            <th style="width:150px">PARE Dr (Rp)</th>
+            <th style="width:150px">PARE Cr (Rp)</th>
+            <th style="width:160px">Per Audit (Rp)</th>
+          </tr>
+        </thead>
+        <tbody id="body-m2"></tbody>
+        <tfoot id="foot-m2"></tfoot>
+      </table>
+    </div>
+    <div class="catatan-wrap" id="catatan-m2-wrap">
+      <div class="catatan-label"><span class="catatan-icon">&#9998;</span> Catatan Pemeriksaan:</div>
+      <textarea id="catatan-m2" placeholder="Tuliskan simpulan atau temuan audit Anda untuk Utang Pajak di sini...&#10;Contoh: Saldo utang PPh 21 per audit sebesar Rp ... telah disesuaikan dengan temuan pada M2.1."></textarea>
+      <div class="catatan-hint">&#9432; Kolom ini akan terkunci setelah tombol 'Periksa Jawaban' diklik.</div>
+    </div>
+  </div>
+
+  <!-- ============================
+       TAB: M2.1 — DAFTAR PPH 21
+       ============================ -->
+  <div id="tab-m21" class="tab-pane">
+    <div class="section-title">
+      <span class="ref-badge">M2.1</span>
+      Daftar Perhitungan PPh 21 Karyawan
+    </div>
+    <div class="info-box">
+      <strong>Petunjuk:</strong> Isi kolom <em>Biaya Jabatan</em>, <em>PKP</em>, dan <em>PPh 21 Terutang</em>. Kolom <em>Bruto</em> terhitung otomatis (Gaji + THR). PTKP dan Gaji/THR sudah ditetapkan.
+    </div>
+    <div class="tbl-scroll">
+      <table id="tbl-m21">
+        <thead>
+          <tr>
+            <th style="text-align:left; width:110px">Nama Karyawan</th>
+            <th style="width:80px">Masa Kerja</th>
+            <th style="width:50px">Status</th>
+            <th style="width:115px">Penghasilan Bruto/tahun (Rp)</th>
+            <th style="width:105px">THR (Rp)</th>
+            <th style="width:115px">Total Penghasilan Bruto (Rp)</th>
+            <th style="width:110px">Biaya Jabatan (Rp)</th>
+            <th style="width:105px">BPJS (Rp)</th>
+            <th style="width:115px">Jumlah Penghasilan Neto (Rp)</th>
+            <th style="width:105px">PTKP (Rp)</th>
+            <th style="width:110px">PhKP (Rp)</th>
+            <th style="width:120px">PPh 21 Terutang (Rp)</th>
+          </tr>
+        </thead>
+        <tbody id="body-m21"></tbody>
+        <tfoot id="foot-m21"></tfoot>
+      </table>
+    </div>
+    <div class="catatan-wrap" id="catatan-m21-wrap">
+      <div class="catatan-label"><span class="catatan-icon">&#9998;</span> Catatan Pemeriksaan:</div>
+      <textarea id="catatan-m21" placeholder="Tuliskan simpulan atau temuan audit Anda untuk Perhitungan PPh 21 di sini...&#10;Contoh: Total PPh 21 terutang seluruh karyawan sebesar Rp 19.940.250. Terdapat selisih dengan setoran sebesar Rp 63.250 yang merupakan kurang bayar."></textarea>
+      <div class="catatan-hint">&#9432; Kolom ini akan terkunci setelah tombol 'Periksa Jawaban' diklik.</div>
+    </div>
+  </div>
+
+  <!-- ============================
+       TAB: M2.1.1 — SETORAN PPH 21
+       ============================ -->
+  <div id="tab-m211" class="tab-pane">
+    <div class="section-title">
+      <span class="ref-badge">M2.1.1</span>
+      Rincian Setoran PPh 21 Bulanan
+    </div>
+    <div class="info-box">
+      <strong>Petunjuk:</strong> Isi <em>Tanggal Setor</em>, <em>Jumlah (Rp)</em>, dan <em>Tanggal Lapor</em> untuk setiap masa pajak. Total setoran yang benar adalah <strong>Rp 19.877.000</strong>.
+    </div>
+    <div class="tbl-scroll">
+      <table id="tbl-m211">
+        <thead>
+          <tr>
+            <th style="width:60px">No</th>
+            <th style="width:120px">Masa Pajak</th>
+            <th style="width:180px">Tanggal Setor</th>
+            <th style="width:180px">Jumlah (Rp)</th>
+            <th style="width:180px">Tanggal Lapor</th>
+          </tr>
+        </thead>
+        <tbody id="body-m211"></tbody>
+        <tfoot id="foot-m211"></tfoot>
+      </table>
+    </div>
+    <div class="catatan-wrap" id="catatan-m211-wrap">
+      <div class="catatan-label"><span class="catatan-icon">&#9998;</span> Catatan Pemeriksaan:</div>
+      <textarea id="catatan-m211" placeholder="Tuliskan simpulan atau temuan audit Anda untuk Setoran PPh 21 di sini...&#10;Contoh: Total setoran PPh 21 yang terverifikasi sebesar Rp 19.877.000 (Jan–Nov @ Rp 1.807.000). Masa Desember nihil. Terdapat selisih kurang setor Rp 8.703.250 dari PPh 21 terutang."></textarea>
+      <div class="catatan-hint">&#9432; Kolom ini akan terkunci setelah tombol 'Periksa Jawaban' diklik.</div>
+    </div>
+
+    <!-- PANEL SUBMIT — di dalam tab M2.1.1 -->
+    <div class="submit-panel" id="submit-panel">
+      <div class="submit-left">
+        <div class="score-label">Skor Akhir</div>
+        <div class="score-value" id="score-val">— / 100</div>
+        <div class="score-bar-wrap"><div class="score-bar-fill" id="score-bar"></div></div>
+        <div style="font-size:11px; color:#8a9bb0; margin-top:4px;">Tersedia setelah semua tab diisi</div>
+      </div>
+      <div class="submit-right">
+        <div id="warning-box" class="warning-box" style="display:none;"></div>
+        <div class="submit-checklist" id="submit-checklist"></div>
+        <div class="btn-group">
+          <button class="btn btn-check" id="btn-check" onclick="periksaJawaban()">&#10003; Periksa Jawaban</button>
+          <button class="btn btn-pdf"   id="btn-pdf"   onclick="savePDF()">&#8681; Save as PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app-wrapper -->
+
+<script>
+// ============================================================
+//  UTILITY
+// ============================================================
+function fmt(n) {
+  if (n === null || n === undefined || n === '') return '';
+  return Number(n).toLocaleString('id-ID');
+}
+function unformat(s) {
+  if (s === '' || s === null || s === undefined) return 0;
+  return parseFloat(String(s).replace(/\./g, '').replace(',', '.')) || 0;
+}
+function mkInput(type, id, cls, placeholder) {
+  return `<input type="${type}" id="${id}" class="${cls||''}" placeholder="${placeholder||''}" autocomplete="off">`;
+}
+function mkRo(val, cls) {
+  return `<div class="cell-ro ${cls||''}">${fmt(val)}</div>`;
+}
+function mkAuto(id) {
+  return `<div class="cell-auto" id="${id}">0</div>`;
+}
+function setAuto(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = fmt(Math.round(val));
+}
+
+// ============================================================
+//  TAB SWITCHING
+// ============================================================
+function openTab(name, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ============================================================
+//  PL3 DATA & BUILD
+// ============================================================
+const PL3_DATA = [
+  { no:1,  ket:'Beban Gaji',            klien:576550000,  drAns:19877000,   crAns:0,          drEditable:true,  crEditable:false },
+  { no:2,  ket:'Beban Kesejahteraan',   klien:40000000,   drAns:10000000,   crAns:0,          drEditable:true,  crEditable:false },
+  { no:3,  ket:'Beban Perjalanan Dinas',klien:100000000,  drAns:0,          crAns:60000000,   drEditable:false, crEditable:true  },
+  { no:4,  ket:'Beban Komisi',          klien:0,          drAns:60000000,   crAns:0,          drEditable:true,  crEditable:false },
+  { no:5,  ket:'Beban Jamuan',          klien:10500000,   drAns:24500000,   crAns:0,          drEditable:true,  crEditable:false },
+  { no:6,  ket:'Beban Perlengkapan',    klien:14500000,   drAns:0,          crAns:4500000,    drEditable:false, crEditable:true  },
+  { no:7,  ket:'Beban Lain-lain',       klien:19877000,   drAns:0,          crAns:19877000,   drEditable:false, crEditable:true  },
+  { no:8,  ket:'Beban Penyusutan',      klien:85000000,   drAns:0,          crAns:0,          drEditable:false, crEditable:false },
+  { no:9,  ket:'Beban Sewa',            klien:120000000,  drAns:0,          crAns:0,          drEditable:false, crEditable:false },
+  { no:10, ket:'Beban Asuransi',        klien:18000000,   drAns:0,          crAns:0,          drEditable:false, crEditable:false },
+];
+
+function buildPL3() {
+  const tbody = document.getElementById('body-pl3');
+  PL3_DATA.forEach((r, i) => {
+    const drCell = r.drEditable
+      ? `<input type="number" id="pl3-dr-${i}" placeholder="0" oninput="calcPL3(${i})" min="0">`
+      : `<div class="cell-ro">0</div>`;
+    const crCell = r.crEditable
+      ? `<input type="number" id="pl3-cr-${i}" placeholder="0" oninput="calcPL3(${i})" min="0">`
+      : `<div class="cell-ro">0</div>`;
+    tbody.innerHTML += `<tr id="pl3-row-${i}">
+      <td><div class="cell-ro center">${r.no}</div></td>
+      <td><div class="cell-ro left">${r.ket}</div></td>
+      <td><div class="cell-ro">${fmt(r.klien)}</div></td>
+      <td id="pl3-dr-cell-${i}">${drCell}</td>
+      <td id="pl3-cr-cell-${i}">${crCell}</td>
+      <td>${mkAuto('pl3-auto-' + i)}</td>
+    </tr>`;
+  });
+  // tfoot totals
+  const foot = document.getElementById('foot-pl3');
+  foot.innerHTML = `<tr class="total-row">
+    <td colspan="2" style="text-align:center; padding:8px;">TOTAL</td>
+    <td><div class="cell-auto" id="pl3-tot-klien">0</div></td>
+    <td><div class="cell-auto" id="pl3-tot-dr">0</div></td>
+    <td><div class="cell-auto" id="pl3-tot-cr">0</div></td>
+    <td><div class="cell-auto" id="pl3-tot-audit">0</div></td>
+  </tr>`;
+  updatePL3Totals();
+}
+
+function calcPL3(i) { updatePL3Totals(); }
+function getNum(id) { const el=document.getElementById(id); return el ? parseFloat(el.value)||0 : 0; }
+
+function updatePL3Totals() {
+  let totKlien=0, totDr=0, totCr=0, totAudit=0;
+  PL3_DATA.forEach((r, i) => {
+    const dr = r.drEditable ? getNum('pl3-dr-'+i) : 0;
+    const cr = r.crEditable ? getNum('pl3-cr-'+i) : 0;
+    const audit = r.klien + dr - cr;
+    setAuto('pl3-auto-'+i, audit);
+    totKlien += r.klien;
+    totDr    += dr;
+    totCr    += cr;
+    totAudit += audit;
+  });
+  setAuto('pl3-tot-klien', totKlien);
+  setAuto('pl3-tot-dr', totDr);
+  setAuto('pl3-tot-cr', totCr);
+  setAuto('pl3-tot-audit', totAudit);
+}
+
+// ============================================================
+//  M2 DATA & BUILD
+// ============================================================
+const M2_DATA = [
+  { ket:'PPh Pasal 21',   wpRefAns:'M2.1', klien:580627892, drAns:28568359, crAns:8703250,   wpEditable:true,  drEditable:true,  crEditable:true  },
+  { ket:'PPh Pasal 25/29',wpRefAns:'',     klien:0,         drAns:0,        crAns:580627892, wpEditable:false, drEditable:false, crEditable:true  },
+  { ket:'PPN Keluaran',   wpRefAns:'',     klien:125000000, drAns:0,        crAns:0,         wpEditable:false, drEditable:false, crEditable:false },
+  { ket:'PPN Masukan',    wpRefAns:'',     klien:98500000,  drAns:0,        crAns:0,         wpEditable:false, drEditable:false, crEditable:false },
+];
+
+function buildM2() {
+  const tbody = document.getElementById('body-m2');
+  M2_DATA.forEach((r, i) => {
+    const wpCell = r.wpEditable ? `<input type="text" id="m2-wp-${i}" class="left" placeholder="Ref...">` : `<div class="cell-ro center">—</div>`;
+    const drCell = r.drEditable ? `<input type="number" id="m2-dr-${i}" placeholder="0" oninput="calcM2(${i})" min="0">` : `<div class="cell-ro">0</div>`;
+    const crCell = r.crEditable ? `<input type="number" id="m2-cr-${i}" placeholder="0" oninput="calcM2(${i})" min="0">` : `<div class="cell-ro">0</div>`;
+    tbody.innerHTML += `<tr id="m2-row-${i}">
+      <td><div class="cell-ro left">${r.ket}</div></td>
+      <td id="m2-wp-cell-${i}">${wpCell}</td>
+      <td><div class="cell-ro">${fmt(r.klien)}</div></td>
+      <td id="m2-dr-cell-${i}">${drCell}</td>
+      <td id="m2-cr-cell-${i}">${crCell}</td>
+      <td>${mkAuto('m2-auto-' + i)}</td>
+    </tr>`;
+  });
+  const foot = document.getElementById('foot-m2');
+  foot.innerHTML = `<tr class="total-row">
+    <td colspan="2" style="text-align:center; padding:8px;">TOTAL</td>
+    <td><div class="cell-auto" id="m2-tot-klien">0</div></td>
+    <td><div class="cell-auto" id="m2-tot-dr">0</div></td>
+    <td><div class="cell-auto" id="m2-tot-cr">0</div></td>
+    <td><div class="cell-auto" id="m2-tot-audit">0</div></td>
+  </tr>`;
+  updateM2Totals();
+}
+
+function calcM2(i) { updateM2Totals(); }
+function updateM2Totals() {
+  let totKlien=0, totDr=0, totCr=0, totAudit=0;
+  M2_DATA.forEach((r, i) => {
+    const dr = r.drEditable ? getNum('m2-dr-'+i) : 0;
+    const cr = r.crEditable ? getNum('m2-cr-'+i) : 0;
+    const audit = r.klien + cr - dr;
+    setAuto('m2-auto-'+i, audit);
+    totKlien += r.klien;
+    totDr    += dr;
+    totCr    += cr;
+    totAudit += audit;
+  });
+  setAuto('m2-tot-klien', totKlien);
+  setAuto('m2-tot-dr', totDr);
+  setAuto('m2-tot-cr', totCr);
+  setAuto('m2-tot-audit', totAudit);
+}
+
+// ============================================================
+//  M2.1 DATA & BUILD
+// ============================================================
+// Columns: nama, masa, status, gaji(RO), thr(RO), bruto(auto), bj(input), bpjs(input), neto(input), ptkp(RO), pkp(input), pph(input)
+const M21_DATA = [
+  { nama:'Diestri',   masa:'Jan–Des', status:'K/1', gaji:180000000, thr:15000000, ptkp:63000000,  bjAns:6000000,  bpjsAns:7215000,  netoAns:181785000, pkpAns:118785000,  pphAns:12817750 },
+  { nama:'Wansen',    masa:'Jan–Des', status:'K/3', gaji:96000000,  thr:8000000,  ptkp:72000000,  bjAns:5200000,  bpjsAns:3848000,  netoAns:94952000,  pkpAns:22952000,   pphAns:1147600  },
+  { nama:'Sugeng',    masa:'Jan–Des', status:'TK',  gaji:96000000,  thr:8000000,  ptkp:54000000,  bjAns:5200000,  bpjsAns:3848000,  netoAns:94952000,  pkpAns:40952000,   pphAns:2047600  },
+  { nama:'Yadi',      masa:'Jan–Des', status:'TK',  gaji:108000000, thr:9000000,  ptkp:54000000,  bjAns:5850000,  bpjsAns:4329000,  netoAns:106821000, pkpAns:52821000,   pphAns:2923150  },
+  { nama:'Chaterine', masa:'Jul–Des', status:'TK',  gaji:30000000,  thr:2500000,  ptkp:54000000,  bjAns:1625000,  bpjsAns:1202500,  netoAns:29672500,  pkpAns:-23125000,  pphAns:0        },
+  { nama:'Daniel',    masa:'Jan–Des', status:'K/1', gaji:84000000,  thr:7000000,  ptkp:63000000,  bjAns:4550000,  bpjsAns:3367000,  netoAns:83083000,  pkpAns:20083000,   pphAns:1004150  },
+  { nama:'Vivian',    masa:'Jan–Des', status:'K/1', gaji:48000000,  thr:4000000,  ptkp:54000000,  bjAns:2600000,  bpjsAns:1924000,  netoAns:47476000,  pkpAns:-13600000,  pphAns:0        },
+  { nama:'Nehemia',   masa:'Jan–Des', status:'TK',  gaji:48000000,  thr:4000000,  ptkp:54000000,  bjAns:2600000,  bpjsAns:1924000,  netoAns:47476000,  pkpAns:-4600000,   pphAns:0        },
+  { nama:'Utomo',     masa:'Jan–Des', status:'K/2', gaji:48000000,  thr:4000000,  ptkp:67500000,  bjAns:2600000,  bpjsAns:1924000,  netoAns:47476000,  pkpAns:-18100000,  pphAns:0        },
+  { nama:'Jeremiah',  masa:'Mar–Des', status:'K/0', gaji:35000000,  thr:3000000,  ptkp:58500000,  bjAns:1900000,  bpjsAns:1406000,  netoAns:34694000,  pkpAns:-22400000,  pphAns:0        },
+  { nama:'Janet',     masa:'Apr–Des', status:'TK',  gaji:31500000,  thr:2625000,  ptkp:54000000,  bjAns:1706250,  bpjsAns:1262625,  netoAns:31156125,  pkpAns:-21581250,  pphAns:0        },
+  { nama:'Clarisa',   masa:'Nov–Des', status:'TK',  gaji:7600000,   thr:0,        ptkp:54000000,  bjAns:380000,   bpjsAns:281200,   netoAns:6938800,   pkpAns:-46780000,  pphAns:0        },
+  { nama:'Olivia',    masa:'Jan–Des', status:'TK',  gaji:48000000,  thr:4000000,  ptkp:54000000,  bjAns:2600000,  bpjsAns:1924000,  netoAns:47476000,  pkpAns:-4600000,   pphAns:0        },
+  { nama:'Patricia',  masa:'Jan–Des', status:'TK',  gaji:48000000,  thr:4000000,  ptkp:54000000,  bjAns:2600000,  bpjsAns:1924000,  netoAns:47476000,  pkpAns:-4600000,   pphAns:0        },
+  { nama:'Iwan',      masa:'Feb–Des', status:'TK',  gaji:46200000,  thr:3850000,  ptkp:54000000,  bjAns:2502500,  bpjsAns:1851850,  netoAns:45695650,  pkpAns:-6452500,   pphAns:0        },
+];
+// Baris karyawan di bawah PTKP: gaji & THR total (read-only ringkasan), no check
+// Dari gambar: Gaji 329.632.400, THR 32.517.600
+const M21_BAWAH_PTKP = { gaji: 329632400, thr: 32517600 };
+const M21_TOTAL_PPH = 19940250;
+
+function fmtPhKP(n) {
+  // Nilai negatif ditampilkan dalam kurung
+  if (n < 0) return '(' + fmt(Math.abs(n)) + ')';
+  return fmt(n);
+}
+
+function buildM21() {
+  const tbody = document.getElementById('body-m21');
+  M21_DATA.forEach((r, i) => {
+    const bruto = r.gaji + r.thr;
+    tbody.innerHTML += `<tr id="m21-row-${i}">
+      <td><div class="cell-ro left">${r.nama}</div></td>
+      <td><div class="cell-ro center">${r.masa}</div></td>
+      <td><div class="cell-ro center">${r.status}</div></td>
+      <td><div class="cell-ro">${fmt(r.gaji)}</div></td>
+      <td><div class="cell-ro">${r.thr > 0 ? fmt(r.thr) : '0'}</div></td>
+      <td><div class="cell-auto" id="m21-bruto-${i}">${fmt(bruto)}</div></td>
+      <td id="m21-bj-cell-${i}"><input type="number" id="m21-bj-${i}" placeholder="0" min="0"></td>
+      <td id="m21-bpjs-cell-${i}"><input type="number" id="m21-bpjs-${i}" placeholder="0" min="0"></td>
+      <td id="m21-neto-cell-${i}"><input type="number" id="m21-neto-${i}" placeholder="0"></td>
+      <td><div class="cell-ro">${fmt(r.ptkp)}</div></td>
+      <td id="m21-pkp-cell-${i}"><input type="number" id="m21-pkp-${i}" placeholder="0"></td>
+      <td id="m21-pph-cell-${i}"><input type="number" id="m21-pph-${i}" placeholder="0" min="0"></td>
+    </tr>`;
+  });
+
+  // Baris ringkasan "Karyawan di bawah PTKP"
+  tbody.innerHTML += `<tr style="background:#f0f4f8;">
+    <td colspan="2"><div class="cell-ro left" style="font-style:italic; color:#5a6a80;">Karyawan di bawah PTKP</div></td>
+    <td></td>
+    <td><div class="cell-ro" style="font-style:italic;">${fmt(M21_BAWAH_PTKP.gaji)}</div></td>
+    <td><div class="cell-ro" style="font-style:italic;">${fmt(M21_BAWAH_PTKP.thr)}</div></td>
+    <td colspan="7"></td>
+  </tr>`;
+
+  const foot = document.getElementById('foot-m21');
+  foot.innerHTML = `<tr class="total-row">
+    <td colspan="2" style="text-align:right; padding:8px;">TOTAL</td>
+    <td></td>
+    <td id="m21-tot-gaji" style="text-align:right; padding:8px;"></td>
+    <td id="m21-tot-thr"  style="text-align:right; padding:8px;"></td>
+    <td colspan="6"></td>
+    <td id="m21-tot-cell"><input type="number" id="m21-tot" placeholder="0" min="0"></td>
+  </tr>`;
+
+  // Hitung total gaji & THR untuk footer
+  let totGaji = M21_DATA.reduce((s,r)=>s+r.gaji,0) + M21_BAWAH_PTKP.gaji;
+  let totThr  = M21_DATA.reduce((s,r)=>s+r.thr,0)  + M21_BAWAH_PTKP.thr;
+  document.getElementById('m21-tot-gaji').textContent = fmt(totGaji);
+  document.getElementById('m21-tot-thr').textContent  = fmt(totThr);
+}
+
+// ============================================================
+//  M2.1.1 DATA & BUILD
+// ============================================================
+const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const M211_JML_ANS = 1807000; // Jan-Nov
+// Des = 0
+
+function buildM211() {
+  const tbody = document.getElementById('body-m211');
+  BULAN.forEach((b, i) => {
+    const jmlAns = i < 11 ? M211_JML_ANS : 0;
+    tbody.innerHTML += `<tr id="m211-row-${i}">
+      <td><div class="cell-ro center">${i+1}</div></td>
+      <td><div class="cell-ro center">${b} 2023</div></td>
+      <td id="m211-tgl-cell-${i}"><input type="text" id="m211-tgl-${i}" class="left" placeholder="dd/mm/yyyy"></td>
+      <td id="m211-jml-cell-${i}"><input type="number" id="m211-jml-${i}" placeholder="0" min="0"></td>
+      <td id="m211-lapor-cell-${i}"><input type="text" id="m211-lapor-${i}" class="left" placeholder="dd/mm/yyyy"></td>
+    </tr>`;
+  });
+  const foot = document.getElementById('foot-m211');
+  foot.innerHTML = `<tr class="m211-total">
+    <td colspan="3" style="padding:8px; text-align:center;">TOTAL SETORAN PPh 21</td>
+    <td id="m211-tot-cell"><input type="number" id="m211-tot" placeholder="0" min="0" style="color:#fff; font-weight:700;"></td>
+    <td></td>
+  </tr>`;
+}
+
+// ============================================================
+//  SCORING ENGINE
+// ============================================================
+let checked = false;
+let totalPoints = 0;
+let earnedPoints = 0;
+
+// Points: PL3 dr/cr = 1pt each (7 editable fields)
+// M2 wp/dr/cr = 1pt each (4 editable fields)
+// M2.1 bj/pkp/pph = 1pt each (11*3=33) + total 1pt
+// M2.1.1 jumlah = 1pt each (12) + total 1pt
+// Total = 7 + 4 + 33+1 + 12+1 = 58 raw points → scaled to 100
+
+function periksaJawaban() {
+  if (checked) return;
+
+  // ── VALIDASI: semua field wajib harus terisi ──
+  const kosong = [];
+
+  // 1. Identitas wajib diisi
+  if (!document.getElementById('inp-nama').value.trim())  kosong.push('Nama Mahasiswa belum diisi');
+  if (!document.getElementById('inp-nim').value.trim())   kosong.push('NIM belum diisi');
+  if (!document.getElementById('inp-kelas').value.trim()) kosong.push('Kelas belum diisi');
+
+  // 2. PL3 — semua field PARE Dr/Cr yang editable harus diisi (nilai apapun, termasuk 0 yg disengaja → cek apakah input tidak kosong)
+  let pl3Kosong = 0;
+  PL3_DATA.forEach((r, i) => {
+    if (r.drEditable) { const el = document.getElementById('pl3-dr-'+i); if (!el || el.value.trim() === '') pl3Kosong++; }
+    if (r.crEditable) { const el = document.getElementById('pl3-cr-'+i); if (!el || el.value.trim() === '') pl3Kosong++; }
+  });
+  if (pl3Kosong > 0) kosong.push(`Tab PL3 — masih ada ${pl3Kosong} kolom PARE yang belum diisi`);
+
+  // 3. M2 — WP Ref, Dr, Cr yang editable harus diisi
+  let m2Kosong = 0;
+  M2_DATA.forEach((r, i) => {
+    if (r.wpEditable) { const el = document.getElementById('m2-wp-'+i); if (!el || el.value.trim() === '') m2Kosong++; }
+    if (r.drEditable) { const el = document.getElementById('m2-dr-'+i); if (!el || el.value.trim() === '') m2Kosong++; }
+    if (r.crEditable) { const el = document.getElementById('m2-cr-'+i); if (!el || el.value.trim() === '') m2Kosong++; }
+  });
+  if (m2Kosong > 0) kosong.push(`Tab M2 — masih ada ${m2Kosong} kolom yang belum diisi`);
+
+  // 4. M2.1 — semua baris: bj, bpjs, neto, pkp, pph harus diisi, plus total
+  let m21Kosong = 0;
+  M21_DATA.forEach((r, i) => {
+    ['m21-bj-','m21-bpjs-','m21-neto-','m21-pkp-','m21-pph-'].forEach(pfx => {
+      const el = document.getElementById(pfx+i);
+      if (!el || el.value.trim() === '') m21Kosong++;
+    });
+  });
+  const m21Tot = document.getElementById('m21-tot');
+  if (!m21Tot || m21Tot.value.trim() === '') m21Kosong++;
+  if (m21Kosong > 0) kosong.push(`Tab M2.1 — masih ada ${m21Kosong} kolom yang belum diisi`);
+
+  // 5. M2.1.1 — semua 12 jumlah setoran harus diisi, plus total
+  let m211Kosong = 0;
+  for (let i = 0; i < 12; i++) {
+    const el = document.getElementById('m211-jml-'+i);
+    if (!el || el.value.trim() === '') m211Kosong++;
+  }
+  const m211Tot = document.getElementById('m211-tot');
+  if (!m211Tot || m211Tot.value.trim() === '') m211Kosong++;
+  if (m211Kosong > 0) kosong.push(`Tab M2.1.1 — masih ada ${m211Kosong} kolom jumlah setoran yang belum diisi`);
+
+  // Tampilkan peringatan jika ada yang kosong
+  const wb = document.getElementById('warning-box');
+  if (kosong.length > 0) {
+    wb.style.display = 'block';
+    wb.innerHTML = `<strong>⚠ Lembar jawaban belum lengkap. Harap isi terlebih dahulu:</strong><ul>${kosong.map(k=>`<li>${k}</li>`).join('')}</ul>`;
+    return;
+  }
+
+  // Semua lolos — lanjutkan
+  wb.style.display = 'none';
+  checked = true;
+  lockIdentity();
+  earnedPoints = 0;
+  totalPoints = 0;
+
+  // ---- PL3 ----
+  PL3_DATA.forEach((r, i) => {
+    if (r.drEditable) {
+      totalPoints++;
+      checkCell('pl3-dr-'+i, 'pl3-dr-cell-'+i, r.drAns, false);
+    }
+    if (r.crEditable) {
+      totalPoints++;
+      checkCell('pl3-cr-'+i, 'pl3-cr-cell-'+i, r.crAns, false);
+    }
+  });
+  updatePL3Totals();
+
+  // ---- M2 ----
+  M2_DATA.forEach((r, i) => {
+    if (r.wpEditable) {
+      totalPoints++;
+      checkCellText('m2-wp-'+i, 'm2-wp-cell-'+i, r.wpRefAns);
+    }
+    if (r.drEditable) {
+      totalPoints++;
+      checkCell('m2-dr-'+i, 'm2-dr-cell-'+i, r.drAns, false);
+    }
+    if (r.crEditable) {
+      totalPoints++;
+      checkCell('m2-cr-'+i, 'm2-cr-cell-'+i, r.crAns, false);
+    }
+  });
+  updateM2Totals();
+
+  // ---- M2.1 ----
+  M21_DATA.forEach((r, i) => {
+    totalPoints += 5; // bj, bpjs, neto, pkp, pph
+    checkCell('m21-bj-'+i,   'm21-bj-cell-'+i,   r.bjAns,   false);
+    checkCell('m21-bpjs-'+i, 'm21-bpjs-cell-'+i, r.bpjsAns, false);
+    checkCell('m21-neto-'+i, 'm21-neto-cell-'+i, r.netoAns, false);
+    checkCell('m21-pkp-'+i,  'm21-pkp-cell-'+i,  r.pkpAns,  false);
+    checkCell('m21-pph-'+i,  'm21-pph-cell-'+i,  r.pphAns,  false);
+  });
+  totalPoints++; // total pph
+  checkCell('m21-tot', 'm21-tot-cell', M21_TOTAL_PPH, false);
+
+  // ---- M2.1.1 ----
+  BULAN.forEach((b, i) => {
+    totalPoints++;
+    const ans = i < 11 ? M211_JML_ANS : 0;
+    checkCell('m211-jml-'+i, 'm211-jml-cell-'+i, ans, false);
+  });
+  totalPoints++; // total setoran
+  checkCell('m211-tot', 'm211-tot-cell', 19877000, false);
+
+  // Lock all remaining inputs
+  lockAllInputs();
+
+  // Score
+  const skor = Math.round((earnedPoints / totalPoints) * 100);
+  document.getElementById('score-val').textContent = skor + ' / 100';
+  document.getElementById('score-bar').style.width = skor + '%';
+  document.getElementById('btn-check').disabled = true;
+}
+
+function checkCell(inputId, cellId, correct, signed) {
+  const el = document.getElementById(inputId);
+  const cell = document.getElementById(cellId);
+  if (!el || !cell) return;
+  const val = parseFloat(el.value);
+  const isCorrect = Math.abs(val - correct) < 1;
+  el.readOnly = true;
+  if (isCorrect) {
+    cell.classList.add('cell-correct');
+    earnedPoints++;
+  } else {
+    cell.classList.add('cell-wrong');
+    const hint = document.createElement('span');
+    hint.className = 'hint-text';
+    hint.textContent = 'Kunci: ' + fmt(correct);
+    el.parentNode.appendChild(hint);
+  }
+}
+
+function checkCellText(inputId, cellId, correct) {
+  const el = document.getElementById(inputId);
+  const cell = document.getElementById(cellId);
+  if (!el || !cell) return;
+  const val = el.value.trim();
+  el.readOnly = true;
+  if (val === correct) {
+    cell.classList.add('cell-correct');
+    earnedPoints++;
+  } else {
+    cell.classList.add('cell-wrong');
+    const hint = document.createElement('span');
+    hint.className = 'hint-text';
+    hint.textContent = 'Kunci: ' + correct;
+    el.parentNode.appendChild(hint);
+  }
+}
+
+function lockIdentity() {
+  ['inp-nama','inp-nim','inp-kelas','inp-tanggal'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.readOnly = true;
+  });
+}
+
+function lockAllInputs() {
+  document.querySelectorAll('input').forEach(el => { el.readOnly = true; });
+  // Lock and grey-out all catatan textareas
+  ['catatan-pl3','catatan-m2','catatan-m21','catatan-m211'].forEach(id => {
+    const ta = document.getElementById(id);
+    if (ta) { ta.readOnly = true; }
+    const wrap = document.getElementById(id + '-wrap');
+    if (wrap) { wrap.classList.add('locked'); }
+  });
+}
+
+// ============================================================
+//  PDF EXPORT
+// ============================================================
+async function savePDF() {
+  const btn = document.getElementById('btn-pdf');
+  const origText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Menyiapkan PDF...';
+
+  const { jsPDF } = window.jspdf;
+
+  // Temporarily show ALL tab panes for capture
+  const allPanes = document.querySelectorAll('.tab-pane');
+  const tabsNav   = document.querySelector('.tabs-nav');
+  const btnGroup  = document.querySelector('.btn-group');
+  const warnBox   = document.getElementById('warning-box');
+
+  // Save original display states
+  const origDisplay    = Array.from(allPanes).map(p => p.style.display);
+  const origNavDisplay = tabsNav.style.display;
+  const origBtnDisplay = btnGroup.style.display;
+  const origWarnDisplay = warnBox ? warnBox.style.display : '';
+
+  // Show all panes stacked, hide interactive elements
+  allPanes.forEach(p => { p.style.display = 'block'; });
+  tabsNav.style.display  = 'none';
+  btnGroup.style.display = 'none';
+  if (warnBox) warnBox.style.display = 'none';
+
+  const el = document.getElementById('app-root');
+
+  try {
+    const canvas = await html2canvas(el, {
+      scale: 1.4,
+      useCORS: true,
+      logging: false,
+      backgroundColor: '#ffffff',
+      windowWidth: 1280
+    });
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfW = pdf.internal.pageSize.getWidth();
+    const pdfH = pdf.internal.pageSize.getHeight();
+    const imgH = (canvas.height * pdfW) / canvas.width;
+
+    let yPos = 0;
+    let remaining = imgH;
+    while (remaining > 0) {
+      pdf.addImage(imgData, 'PNG', 0, -yPos, pdfW, imgH);
+      remaining -= pdfH;
+      yPos += pdfH;
+      if (remaining > 0) pdf.addPage();
+    }
+
+    const nama = document.getElementById('inp-nama').value || 'Mahasiswa';
+    const nim  = document.getElementById('inp-nim').value  || 'NIM';
+    pdf.save(`Audit_SUGUS_M8_${nama}_${nim}.pdf`);
+  } catch(e) {
+    alert('Gagal membuat PDF. Coba lagi.');
+  }
+
+  // Restore original display states
+  allPanes.forEach((p, i) => { p.style.display = origDisplay[i]; });
+  tabsNav.style.display  = origNavDisplay;
+  btnGroup.style.display = origBtnDisplay;
+  if (warnBox) warnBox.style.display = origWarnDisplay;
+
+  btn.disabled = false;
+  btn.textContent = origText;
+}
+
+// ============================================================
+//  SET DEFAULT DATE
+// ============================================================
+function setDefaultDate() {
+  const today = new Date();
+  const d = String(today.getDate()).padStart(2,'0');
+  const m = String(today.getMonth()+1).padStart(2,'0');
+  const y = today.getFullYear();
+  document.getElementById('inp-tanggal').value = `${d}/${m}/${y}`;
+}
+
+// ============================================================
+//  INIT
+// ============================================================
+buildPL3();
+buildM2();
+buildM21();
+buildM211();
+setDefaultDate();
+
+// ============================================================
+//  LIVE CHECKLIST — update status pengisian di panel submit
+// ============================================================
+function cekStatusPengisian() {
+  const items = [
+    {
+      label: 'Identitas (Nama, NIM, Kelas)',
+      ok: () => document.getElementById('inp-nama').value.trim() !== '' &&
+                document.getElementById('inp-nim').value.trim()  !== '' &&
+                document.getElementById('inp-kelas').value.trim() !== ''
+    },
+    {
+      label: 'Tab PL3 — semua PARE terisi',
+      ok: () => PL3_DATA.every((r, i) => {
+        if (r.drEditable) { const el = document.getElementById('pl3-dr-'+i); if (!el || el.value.trim()==='') return false; }
+        if (r.crEditable) { const el = document.getElementById('pl3-cr-'+i); if (!el || el.value.trim()==='') return false; }
+        return true;
+      })
+    },
+    {
+      label: 'Tab M2 — semua kolom terisi',
+      ok: () => M2_DATA.every((r, i) => {
+        if (r.wpEditable) { const el = document.getElementById('m2-wp-'+i); if (!el || el.value.trim()==='') return false; }
+        if (r.drEditable) { const el = document.getElementById('m2-dr-'+i); if (!el || el.value.trim()==='') return false; }
+        if (r.crEditable) { const el = document.getElementById('m2-cr-'+i); if (!el || el.value.trim()==='') return false; }
+        return true;
+      })
+    },
+    {
+      label: 'Tab M2.1 — semua baris & total terisi',
+      ok: () => {
+        const allRows = M21_DATA.every((r, i) =>
+          ['m21-bj-','m21-bpjs-','m21-neto-','m21-pkp-','m21-pph-'].every(pfx => {
+            const el = document.getElementById(pfx+i); return el && el.value.trim() !== '';
+          })
+        );
+        const tot = document.getElementById('m21-tot');
+        return allRows && tot && tot.value.trim() !== '';
+      }
+    },
+    {
+      label: 'Tab M2.1.1 — semua setoran & total terisi',
+      ok: () => {
+        const allJml = Array.from({length:12},(_,i)=>document.getElementById('m211-jml-'+i))
+                           .every(el => el && el.value.trim() !== '');
+        const tot = document.getElementById('m211-tot');
+        return allJml && tot && tot.value.trim() !== '';
+      }
+    }
+  ];
+
+  const cl = document.getElementById('submit-checklist');
+  if (!cl) return;
+  cl.innerHTML = items.map(item => {
+    const ok = item.ok();
+    return `<div class="chk-item">
+      <span>${item.label}</span>
+      <span class="${ok ? 'chk-ok' : 'chk-no'}">${ok ? '✓' : '✗'}</span>
+    </div>`;
+  }).join('');
+}
+
+// Pasang event listener ke seluruh dokumen (delegasi) — update checklist tiap ada input
+document.addEventListener('input',  cekStatusPengisian);
+document.addEventListener('change', cekStatusPengisian);
+cekStatusPengisian(); // jalankan sekali saat load
+</script>
+</body>
+</html>
