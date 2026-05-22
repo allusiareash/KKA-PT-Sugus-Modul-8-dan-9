@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulasi Praktikum Audit Modul 9 — PT SUGUS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f2c5a;
+    --navy-light: #1a3d78;
+    --gold: #b8962e;
+    --gold-light: #d4aa47;
+    --cream: #faf8f4;
+    --ink: #1c1c2e;
+    --muted: #6b7a99;
+    --border: #d4d8e8;
+    --green: #15803d;
+    --red: #b91c1c;
+    --bg: #f0f2f8;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .app-header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 60%, #1e4a9a 100%);
+    padding: 28px 40px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .app-header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .app-header::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(184,150,46,0.18);
+    border: 1px solid rgba(184,150,46,0.5);
+    color: var(--gold-light);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 3px 12px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+  }
+  .header-title {
+    font-family: 'Playfair Display', serif;
+    color: #fff;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .header-sub {
+    color: rgba(255,255,255,0.6);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  /* ── Identity Card ── */
+  .identity-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 24px 32px 0;
+    box-shadow: 0 2px 12px rgba(15,44,90,0.07);
+  }
+  .identity-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .identity-input {
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    width: 100%;
+    background: var(--cream);
+    transition: border-color .2s;
+    outline: none;
+  }
+  .identity-input:focus { border-color: var(--navy-light); background: #fff; }
+
+  /* ── Tabs ── */
+  .tab-bar {
+    display: flex;
+    gap: 0;
+    margin: 20px 32px 0;
+    border-bottom: 2px solid var(--border);
+  }
+  .tab-btn {
+    padding: 10px 24px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color .2s, border-color .2s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: var(--navy); }
+  .tab-btn.active { color: var(--navy); border-bottom-color: var(--gold); }
+
+  /* ── Content Area ── */
+  .content-area { padding: 24px 32px 40px; }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  /* ── Section Card ── */
+  .section-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 16px rgba(15,44,90,0.06);
+    margin-bottom: 20px;
+  }
+  .section-card-header {
+    background: linear-gradient(90deg, var(--navy) 0%, var(--navy-light) 100%);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-card-header h3 {
+    font-family: 'Playfair Display', serif;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    flex: 1;
+  }
+  .section-card-header .sub {
+    color: rgba(255,255,255,0.55);
+    font-size: 12px;
+  }
+  .section-card-body { padding: 20px; }
+
+  /* ── Tables ── */
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: var(--navy);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 10px 12px;
+    text-align: left;
+  }
+  thead th:first-child { border-radius: 6px 0 0 0; }
+  thead th:last-child { border-radius: 0 6px 0 0; }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+  tbody tr:hover { background: #f7f8fc; }
+  tbody td { padding: 8px 10px; font-size: 13px; vertical-align: middle; }
+  tbody tr:last-child { border-bottom: none; }
+
+  .cell-input {
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    transition: border-color .2s;
+    background: var(--cream);
+  }
+  .cell-input:focus { border-color: var(--navy-light); background: #fff; }
+  .cell-input[readonly] { background: #f3f5fa; color: var(--muted); cursor: not-allowed; }
+  .cell-input.money { text-align: right; font-feature-settings: "tnum"; }
+
+  /* Row add button */
+  .add-row-btn {
+    background: transparent;
+    border: 1.5px dashed var(--border);
+    border-radius: 7px;
+    padding: 7px 18px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all .2s;
+  }
+  .add-row-btn:hover { border-color: var(--navy); color: var(--navy); background: #f0f2f8; }
+
+  /* ── Feedback icons ── */
+  .feedback-icon { display: none; font-size: 16px; margin-left: 6px; }
+  .feedback-icon.show { display: inline; }
+  .feedback-icon.correct { color: var(--green); }
+  .feedback-icon.wrong { color: var(--red); }
+
+  /* ── Score Banner ── */
+  .score-banner {
+    display: none;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    border-radius: 12px;
+    padding: 20px 28px;
+    color: #fff;
+    margin-bottom: 20px;
+    align-items: center;
+    gap: 20px;
+  }
+  .score-banner.show { display: flex; }
+  .score-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--gold-light);
+    line-height: 1;
+  }
+  .score-label { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+  .score-detail { font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.6; }
+
+  /* ── Action Buttons ── */
+  .btn-primary {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    box-shadow: 0 3px 12px rgba(15,44,90,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(15,44,90,0.4); }
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    box-shadow: 0 3px 12px rgba(184,150,46,0.3);
+  }
+  .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(184,150,46,0.4); }
+
+  /* ── Representation Letter ── */
+  .letter-wrap {
+    font-family: 'EB Garamond', serif;
+    font-size: 16px;
+    line-height: 1.85;
+    color: #222;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 48px 56px;
+    max-width: 860px;
+    margin: 0 auto;
+    box-shadow: 0 4px 24px rgba(15,44,90,0.08);
+    position: relative;
+  }
+  .letter-wrap::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 5px;
+    background: linear-gradient(90deg, var(--navy), var(--gold), var(--navy));
+    border-radius: 12px 12px 0 0;
+  }
+  .letter-header { text-align: right; margin-bottom: 6px; font-size: 15px; }
+  .letter-to { margin: 16px 0; font-size: 15px; }
+  .letter-salute { margin: 16px 0 4px; }
+  .letter-subject { font-weight: 600; margin-bottom: 16px; }
+  .letter-body p { margin-bottom: 12px; text-align: justify; }
+  .letter-section { margin-top: 18px; }
+  .letter-section-title { font-weight: 700; font-size: 16px; margin-bottom: 8px; }
+  .letter-item { margin-bottom: 10px; padding-left: 8px; }
+  .letter-item-title { font-weight: 600; }
+  .letter-footer { margin-top: 36px; display: flex; justify-content: flex-end; }
+  .letter-footer-box { text-align: center; min-width: 200px; }
+  .letter-sig-line { border-top: 1.5px solid var(--ink); margin-top: 60px; padding-top: 6px; font-size: 14px; }
+
+  .letter-input {
+    border: none;
+    border-bottom: 1.5px solid var(--gold);
+    background: transparent;
+    font-family: 'EB Garamond', serif;
+    font-size: 16px;
+    color: var(--navy);
+    padding: 0 4px 2px;
+    outline: none;
+    min-width: 80px;
+    width: auto;
+    text-align: center;
+    transition: border-color .2s;
+  }
+  .letter-input:focus { border-bottom-color: var(--navy); background: rgba(15,44,90,0.04); }
+  .letter-input[readonly] { color: var(--muted); border-bottom-color: var(--border); }
+  .letter-input.wide { min-width: 160px; }
+  .letter-input.number { min-width: 140px; font-feature-settings: "tnum"; }
+
+  /* ── ARP Table special ── */
+  .arp-positive { color: var(--green); font-weight: 600; }
+  .arp-negative { color: var(--red); font-weight: 600; }
+
+  /* ── Print / PDF ── */
+  @media print {
+    body { background: #fff; }
+    .no-print { display: none !important; }
+    .app-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .section-card-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    thead th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .score-banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .tab-pane { display: block !important; }
+    .content-area { padding: 12px; }
+    .letter-wrap { box-shadow: none; border: 1px solid #ccc; }
+  }
+
+  /* Tooltip */
+  .tooltip { position: relative; display: inline-block; }
+  .tooltip .tip {
+    visibility: hidden; opacity: 0;
+    background: var(--ink); color: #fff;
+    font-size: 11px; padding: 4px 10px; border-radius: 5px;
+    position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%);
+    white-space: nowrap; transition: opacity .2s;
+    pointer-events: none;
+  }
+  .tooltip:hover .tip { visibility: visible; opacity: 1; }
+</style>
+</head>
+<body>
+<div style="background:#0f2c5a;padding:10px 24px;display:flex;align-items:center;gap:14px;font-family:'DM Sans',sans-serif;position:sticky;top:0;z-index:9999;">
+  <a href="../index.html" style="display:inline-flex;align-items:center;gap:7px;color:rgba(255,255,255,0.8);font-size:13px;font-weight:600;text-decoration:none;padding:6px 14px;border:1px solid rgba(255,255,255,0.25);border-radius:7px;background:rgba(255,255,255,0.07);transition:all 0.2s;">
+    &#8592; Kembali ke Portal
+  </a>
+  <span style="color:rgba(255,255,255,0.4);font-size:12px;">Audit Simulator PT SUGUS &#8212; Modul 9</span>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════════ -->
+<div class="app-header no-print">
+  <div class="header-badge">Kertas Kerja Audit</div>
+  <div class="header-title">Simulasi Praktikum Audit — Modul 9</div>
+  <div class="header-sub">PT SUGUS &nbsp;|&nbsp; Tahun Buku 2017 &amp; 2018 &nbsp;|&nbsp; KAP Krisanti dan Rekan</div>
+</div>
+
+<!-- Print Header (visible only on print) -->
+<div style="display:none;" class="print-header">
+  <h1 style="font-family:'Playfair Display',serif;text-align:center;color:#0f2c5a;font-size:22px;margin:0 0 6px;">
+    Kertas Kerja Audit — Modul 9 | PT SUGUS
+  </h1>
+  <p style="text-align:center;font-size:13px;color:#666;">KAP Krisanti dan Rekan &nbsp;|&nbsp; Tahun Buku 2017 &amp; 2018</p>
+  <hr style="margin:12px 0;border-color:#d4d8e8;">
+</div>
+
+<!-- ══════════════════════════════════════════════
+     IDENTITY
+══════════════════════════════════════════════ -->
+<div class="identity-card no-print">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div>
+      <span class="identity-label">Nama Mahasiswa</span>
+      <input id="studentName" class="identity-input" type="text" placeholder="Masukkan nama lengkap…">
+    </div>
+    <div>
+      <span class="identity-label">NIM</span>
+      <input id="studentNIM" class="identity-input" type="text" placeholder="Nomor Induk Mahasiswa…">
+    </div>
+    <div>
+      <span class="identity-label">Kelas</span>
+      <input id="studentClass" class="identity-input" type="text" placeholder="Kelas / Kelompok…">
+    </div>
+  </div>
+</div>
+
+<!-- Identity for print -->
+<div class="identity-print" style="display:none;padding:8px 32px;font-size:13px;color:#444;border-bottom:1px solid #d4d8e8;">
+  <span><b>Nama:</b> <span id="p-name"></span></span> &nbsp;&nbsp;
+  <span><b>NIM:</b> <span id="p-nim"></span></span> &nbsp;&nbsp;
+  <span><b>Kelas:</b> <span id="p-class"></span></span>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     TABS
+══════════════════════════════════════════════ -->
+<div class="tab-bar no-print">
+  <button class="tab-btn active" onclick="switchTab(0,this)">Tab 1 — Jurnal Koreksi (JKK)</button>
+  <button class="tab-btn" onclick="switchTab(1,this)">Tab 2 — Analisis Prosedur Analitis (ARP)</button>
+  <button class="tab-btn" onclick="switchTab(2,this)">Tab 3 — Representation Letter</button>
+</div>
+
+<div class="content-area">
+
+<!-- ══════════════════════════
+     TAB 1: JURNAL KOREKSI
+══════════════════════════ -->
+<div class="tab-pane active" id="tab0">
+  <div class="section-card">
+    <div class="section-card-header">
+      <h3>Jurnal Koreksi Komprehensif (JKK)</h3>
+      <span class="sub">PT SUGUS — Tahun Buku 2018</span>
+    </div>
+    <div class="section-card-body">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">
+        Masukkan jurnal koreksi sesuai temuan audit. Gunakan format angka tanpa titik ribuan. Contoh: <code>12500000</code>
+      </p>
+      <div style="overflow-x:auto;">
+        <table id="jkkTable">
+          <thead>
+            <tr>
+              <th style="width:50px;">No.</th>
+              <th style="width:80px;">Tgl</th>
+              <th>Keterangan / Nama Akun</th>
+              <th style="width:160px;">Ref</th>
+              <th style="width:150px;">Debit (Rp)</th>
+              <th style="width:150px;">Kredit (Rp)</th>
+              <th style="width:40px;" class="no-print"></th>
+            </tr>
+          </thead>
+          <tbody id="jkkBody">
+            <!-- Row template inserted by JS -->
+          </tbody>
+        </table>
+      </div>
+      <button class="add-row-btn no-print" onclick="addJKKRow()">+ Tambah Baris</button>
+
+      <!-- Totals -->
+      <div style="margin-top:16px;display:flex;justify-content:flex-end;gap:40px;border-top:2px solid var(--border);padding-top:12px;">
+        <div style="text-align:right;">
+          <div style="font-size:12px;font-weight:600;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Total Debit</div>
+          <div id="totalDebit" style="font-size:18px;font-weight:700;color:var(--navy);font-feature-settings:'tnum'">Rp 0</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px;font-weight:600;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Total Kredit</div>
+          <div id="totalKredit" style="font-size:18px;font-weight:700;color:var(--navy);font-feature-settings:'tnum'">Rp 0</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px;font-weight:600;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Selisih</div>
+          <div id="totalSelisih" style="font-size:18px;font-weight:700;font-feature-settings:'tnum'" class="arp-negative">Rp 0</div>
+        </div>
+      </div>
+
+      <!-- Answer key section -->
+      <div id="jkkFeedback" style="display:none; margin-top:20px; padding:16px; background:#f8fef9; border:1px solid #bbf7d0; border-radius:8px;">
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px;"></div>
+        <div style="font-size:12px;color:#444;line-height:1.7;overflow-x:auto;" id="jkkKeyText"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════
+     TAB 2: ARP
+══════════════════════════ -->
+<div class="tab-pane" id="tab1">
+
+  <!-- ARP Sub-tabs -->
+  <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid var(--border);" class="no-print">
+    <button class="tab-btn active" id="arpTab0btn" onclick="switchARP(0)" style="font-size:12px;padding:8px 18px;">ARP 2.1 — Neraca Aset</button>
+    <button class="tab-btn" id="arpTab1btn" onclick="switchARP(1)" style="font-size:12px;padding:8px 18px;">ARP 2.2 — Kewajiban &amp; Ekuitas</button>
+    <button class="tab-btn" id="arpTab2btn" onclick="switchARP(2)" style="font-size:12px;padding:8px 18px;">ARP 2.3 — Laba Rugi</button>
+  </div>
+
+  <!-- ─── ARP 2.1 Neraca Aset ─── -->
+  <div id="arpPane0">
+    <div class="section-card">
+      <div class="section-card-header">
+        <h3>ARP 2.1 — Prosedur Penelaahan Analitis Neraca (Aset)</h3>
+        <span class="sub">Klien: PT SUGUS &nbsp;|&nbsp; Periode: 31/12/2018</span>
+      </div>
+      <div class="section-card-body">
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">
+          Kolom <b>Per Audit 31/12/2017</b> sudah terisi sesuai data. Isi kolom <b>Per Audit 31/12/2018</b>. Selisih &amp; % dihitung otomatis.
+        </p>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:36px;">WP Ref.</th>
+                <th>Keterangan</th>
+                <th style="width:155px;">Per Audit 31/12/2017 (Rp)</th>
+                <th style="width:155px;">Per Audit 31/12/2018 (Rp)</th>
+                <th style="width:140px;">Kenaikan (Penurunan) Rp</th>
+                <th style="width:70px;">%</th>
+              </tr>
+            </thead>
+            <tbody id="arp21Body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── ARP 2.2 Kewajiban & Ekuitas ─── -->
+  <div id="arpPane1" style="display:none;">
+    <div class="section-card">
+      <div class="section-card-header">
+        <h3>ARP 2.2 — Prosedur Penelaahan Analitis Neraca (Kewajiban &amp; Ekuitas)</h3>
+        <span class="sub">Klien: PT SUGUS &nbsp;|&nbsp; Periode: 31/12/2018</span>
+      </div>
+      <div class="section-card-body">
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">
+          Kolom <b>Per Audit 31/12/2017</b> sudah terisi sesuai data. Isi kolom <b>Per Audit 31/12/2018</b>. Selisih &amp; % dihitung otomatis.
+        </p>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:36px;">WP Ref.</th>
+                <th>Keterangan</th>
+                <th style="width:155px;">Per Audit 31/12/2017 (Rp)</th>
+                <th style="width:155px;">Per Audit 31/12/2018 (Rp)</th>
+                <th style="width:140px;">Kenaikan (Penurunan) Rp</th>
+                <th style="width:70px;">%</th>
+              </tr>
+            </thead>
+            <tbody id="arp22Body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── ARP 2.3 Laba Rugi ─── -->
+  <div id="arpPane2" style="display:none;">
+    <div class="section-card">
+      <div class="section-card-header">
+        <h3>ARP 2.3 — Prosedur Penelaahan Analitis Laba Rugi</h3>
+        <span class="sub">Klien: PT SUGUS &nbsp;|&nbsp; Periode: 31/12/2018</span>
+      </div>
+      <div class="section-card-body">
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">
+          Kolom <b>Per Audit 31/12/2017</b> sudah terisi sesuai data. Isi kolom <b>Per Audit 31/12/2018</b>. Selisih &amp; % dihitung otomatis.
+        </p>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:36px;">WP Ref.</th>
+                <th>Keterangan</th>
+                <th style="width:155px;">Per Audit 31/12/2017 (Rp)</th>
+                <th style="width:155px;">Per Audit 31/12/2018 (Rp)</th>
+                <th style="width:140px;">Kenaikan (Penurunan) Rp</th>
+                <th style="width:70px;">%</th>
+              </tr>
+            </thead>
+            <tbody id="arp23Body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════
+     TAB 3: REPRESENTATION LETTER
+══════════════════════════ -->
+<div class="tab-pane" id="tab2">
+  <div style="max-width:900px;margin:0 auto;">
+    <div class="letter-wrap" id="repLetter">
+
+      <!-- Header -->
+      <div class="letter-header">
+        <b>No. :</b> 13/II/2018 &emsp;&emsp; <b>Hal :</b> Representation Letter
+      </div>
+      <div class="letter-to">
+        <b>Kepada Yth:</b><br>
+        Kantor Akuntan Publik Krisanti dan Rekan<br>
+        Jl. Tanjung No. 2R<br>
+        Jakarta
+      </div>
+      <div class="letter-salute">Dengan hormat,</div>
+      <div class="letter-subject">
+        Hal: Pernyataan laporan keuangan untuk periode yang berakhir pada tanggal
+        31 Desember <input class="letter-input" id="rl_date1" placeholder="[Tahun]" data-key="2018" size="5"> dan
+        31 Desember <input class="letter-input" id="rl_date2" placeholder="[Tahun]" data-key="2017" size="5">.
+      </div>
+
+      <div class="letter-body">
+        <p>
+          Sehubungan dengan pemeriksaan Saudara atas laporan keuangan PT SUGUS untuk tahun buku yang berakhir pada tanggal-tanggal 31 Desember
+          <input class="letter-input" id="rl_year1" placeholder="[Tahun]" data-key="2018" size="5"> dan
+          31 Desember <input class="letter-input" id="rl_year2" placeholder="[Tahun]" data-key="2017" size="5">,
+          untuk tujuan memberikan pendapat mengenai kewajaran posisi keuangan, hasil usaha, perubahan ekuitas, dan arus kas perusahaan sesuai dengan prinsip akuntansi yang berlaku umum di Indonesia (Standar Akuntansi Keuangan), dengan ini kami menegaskan kepada Saudara bahwa sepanjang pengetahuan kami, pernyataan-pernyataan berikut yang diberikan pada saat pemeriksaan Saudara berlangsung adalah benar.
+        </p>
+
+        <!-- A. UMUM -->
+        <div class="letter-section">
+          <div class="letter-section-title">A. Umum</div>
+          <p>
+            Kami menyadari bahwa sebagai anggota manajemen perusahaan, kami bertanggung jawab atas kewajaran penyajian dalam laporan keuangan mengenai posisi keuangan, hasil usaha, perubahan ekuitas dan arus kas sesuai dengan prinsip akuntansi yang berlaku umum di Indonesia yang diterapkan secara konsisten. Kami telah memberikan semua catatan dan data keuangan yang berhubungan dengan hal tersebut kepada Saudara.
+          </p>
+          <p>
+            Tidak ada transaksi yang dicatat secara tidak benar dalam catatan akuntansi berkaitan dengan jumlah, periode akuntansi, klasifikasi atau hal-hal lain yang dapat berpengaruh terhadap laporan keuangan.
+          </p>
+          <p>
+            Tidak ada saldo atau transaksi yang seharusnya diungkapkan dalam laporan keuangan atau catatan atas laporan keuangan yang belum diungkapkan kepada Saudara.
+          </p>
+          <p>
+            Tidak ada transaksi yang signifikan yang baru terjadi sejak tanggal neraca yang belum tercermin dalam laporan keuangan.
+          </p>
+        </div>
+
+        <!-- B. ASET -->
+        <div class="letter-section">
+          <div class="letter-section-title">B. Aset</div>
+
+          <div class="letter-item">
+            <span class="letter-item-title">a. Piutang: </span>
+            Semua piutang per tanggal 31 Desember
+            <input class="letter-input" id="rl_pb1" placeholder="[Tahun]" data-key="2018" size="5"> dan
+            <input class="letter-input" id="rl_pb2" placeholder="[Tahun]" data-key="2017" size="5">
+            telah dicatat dan disajikan; merupakan tagihan-tagihan yang sah terhadap debitur-debitur yang bersangkutan yang belum diterima pembayarannya pada tanggal neraca sebesar
+            Rp <input class="letter-input number wide" id="rl_piutang" placeholder="[Jumlah Piutang]" data-key="piutang" size="18">.
+            Perusahaan tidak membuat penyisihan piutang ragu-ragu tetapi langsung membebankan ke akun laba rugi atas piutang yang benar-benar tak tertagih. Tidak ada piutang yang dijadikan jaminan kepada pihak bank dan pihak ketiga lainnya.
+          </div>
+
+          <div class="letter-item" style="margin-top:10px;">
+            <span class="letter-item-title">b. Persediaan: </span>
+            Perhitungan fisik terhadap persediaan perusahaan telah dilaksanakan sebagaimana mestinya dengan disaksikan oleh Akuntan Publik. Saldo persediaan telah disesuaikan setelah diadakan pisah batas (cut-off). Persediaan dinilai berdasarkan harga perolehan dengan menerapkan metode
+            <input class="letter-input wide" id="rl_metode" placeholder="[Metode Penilaian]" data-key="masuk-pertama keluar-pertama (FIFO)" size="30">.
+          </div>
+
+          <div class="letter-item" style="margin-top:10px;">
+            <span class="letter-item-title">c. Investasi dalam Bentuk Saham: </span>
+            Semua penyertaan dalam bentuk saham yang mencakup 20% atau lebih yang dimiliki perusahaan per 31 Desember 2018 telah dicatat dan dilaporkan berdasarkan metode ekuitas.
+          </div>
+
+          <div class="letter-item" style="margin-top:10px;">
+            <span class="letter-item-title">d. Aset Tetap: </span>
+            Perusahaan menyusutkan aset tetapnya dengan menggunakan metode
+            <input class="letter-input" id="rl_depresiasi" placeholder="[Metode Depresiasi]" data-key="garis lurus" size="14">.
+            Semua aset tetap yang ada adalah milik perusahaan dan bebas dari segala beban/gadai atau ikatan lainnya. Tidak ada kerugian penurunan nilai (impairment loss) yang harus diakui per tanggal 31 Desember 2018.
+          </div>
+        </div>
+
+        <!-- C. LIABILITAS -->
+        <div class="letter-section">
+          <div class="letter-section-title">C. Liabilitas</div>
+          <p>
+            Semua liabilitas perusahaan per 31 Desember 2018 telah dicatat dan disajikan secara wajar. Tidak ada liabilitas atau kerugian yang bersifat kontinjensi (kewajiban bersyarat) yang diketahui manajemen yang belum dilaporkan kepada Saudara. Tidak ada liabilitas yang dijaminkan dengan aset tertentu kecuali yang telah diungkapkan dalam laporan keuangan.
+          </p>
+          <p>
+            Semua pinjaman dari bank dan lembaga keuangan lainnya telah dicatat dalam pembukuan dan tidak ada yang disembunyikan. Semua perjanjian kredit (loan agreement) dengan bank/kreditur telah dipatuhi oleh perusahaan.
+          </p>
+        </div>
+
+        <!-- D. EKUITAS -->
+        <div class="letter-section">
+          <div class="letter-section-title">D. Ekuitas</div>
+          <p>
+            Semua penerbitan saham, pembelian kembali saham (treasury stock), pembagian dividen, serta perubahan modal lainnya telah dicatat dengan benar dan sesuai dengan ketentuan hukum yang berlaku serta Anggaran Dasar Perusahaan. Tidak ada pembatasan atas pembagian laba ditahan kepada pemegang saham kecuali yang telah diungkapkan.
+          </p>
+        </div>
+
+        <!-- E. PENDAPATAN DAN BEBAN -->
+        <div class="letter-section">
+          <div class="letter-section-title">E. Pendapatan dan Beban</div>
+          <p>
+            Semua pendapatan dan beban yang terjadi selama tahun buku 2018 telah dicatat secara akrual dan periode yang tepat (proper cut-off). Tidak ada pengakuan pendapatan yang dipercepat atau penangguhan beban yang tidak semestinya. Semua retur penjualan, potongan harga, dan pengembalian barang telah dicatat dengan benar.
+          </p>
+        </div>
+
+        <!-- F. PIHAK BERELASI -->
+        <div class="letter-section">
+          <div class="letter-section-title">F. Pihak Berelasi</div>
+          <p>
+            Semua transaksi dengan pihak berelasi telah diungkapkan secara memadai dalam laporan keuangan dan catatan atas laporan keuangan. Tidak ada transaksi dengan pihak berelasi yang tidak wajar atau tidak arm's-length yang belum dilaporkan. Identitas pihak-pihak berelasi yang memiliki hubungan usaha dengan perusahaan telah diungkapkan secara lengkap.
+          </p>
+        </div>
+
+        <!-- G. PERKARA HUKUM DAN KLAIM -->
+        <div class="letter-section">
+          <div class="letter-section-title">G. Perkara Hukum dan Klaim</div>
+          <p>
+            Tidak ada tuntutan hukum, klaim, atau kemungkinan penilaian (assessment) yang belum diungkapkan kepada Saudara dan/atau kepada penasihat hukum (legal counsel) perusahaan. Semua perkara hukum yang sedang dalam proses, baik sebagai penggugat maupun tergugat, telah diungkapkan dalam laporan keuangan sesuai dengan standar akuntansi yang berlaku. Semua kerugian potensial yang mungkin timbul dari perkara hukum dimaksud telah diestimasi dan dicadangkan secara memadai.
+          </p>
+        </div>
+
+        <!-- H. PERISTIWA SETELAH TANGGAL NERACA -->
+        <div class="letter-section">
+          <div class="letter-section-title">H. Peristiwa Setelah Tanggal Neraca (<i>Subsequent Events</i>)</div>
+          <p>
+            Tidak ada peristiwa yang terjadi setelah tanggal 31 Desember 2018 sampai dengan tanggal surat ini yang memerlukan penyesuaian (adjusting subsequent events) terhadap laporan keuangan per 31 Desember 2018 yang belum diungkapkan. Setiap peristiwa setelah tanggal neraca yang bersifat material dan memerlukan pengungkapan (non-adjusting subsequent events) dalam laporan keuangan telah diungkapkan kepada Saudara.
+          </p>
+          <p>
+            Kami mengakui tanggung jawab kami atas kelengkapan dan keakuratan semua informasi yang diberikan dalam surat pernyataan ini, dan kami menyatakan bahwa seluruh informasi tersebut adalah benar dan tidak menyesatkan.
+          </p>
+        </div>
+      </div>
+
+      <!-- Footer / Signature -->
+      <div class="letter-footer">
+        <div class="letter-footer-box">
+          <div>Hormat Kami,</div>
+          <div style="margin-top:6px;font-weight:600;">PT SUGUS</div>
+          <div class="letter-sig-line">
+            <input class="letter-input wide" id="rl_director" placeholder="[Nama Direktur Utama]" size="25">
+            <div style="font-size:14px;margin-top:2px;color:#666;">(Direktur Utama)</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end letter-wrap -->
+
+    <!-- Action Buttons — Tab 3 only, with validation -->
+    <div style="max-width:900px;margin:20px auto 0;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start;" class="no-print">
+      <div style="flex:1;min-width:260px;">
+        <div id="validationMsg" style="display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 16px;font-size:13px;color:#b91c1c;line-height:1.6;margin-bottom:12px;">
+          <b>⚠ Belum dapat diperiksa.</b> Harap isi semua kolom berikut terlebih dahulu:<br>
+          <span id="validationList"></span>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn-primary" id="btnCheck" onclick="checkAnswers()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Cek Jawaban &amp; Kunci
+          </button>
+          <button class="btn-gold" id="btnPDF" onclick="savePDF()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a1 1 0 001 1h16a1 1 0 001-1v-3M16 6l-4-4-4 4"/></svg>
+            Save as PDF
+          </button>
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-top:8px;">
+          Tombol aktif setelah semua Tab 1 (JKK), Tab 2 (ARP), dan Tab 3 (Surat) terisi lengkap.
+        </p>
+      </div>
+      <!-- Score banner appears here after checking -->
+      <div class="score-banner no-print" id="scoreBanner" style="display:none;margin-top:0;flex-direction:column;gap:8px;padding:16px 20px;border-radius:10px;max-width:900px;">
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div>
+            <div class="score-number" id="scoreValue">—</div>
+            <div class="score-label">Skor Akhir (%)</div>
+          </div>
+          <div class="score-detail" id="scoreDetail"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feedback for RL -->
+    <div id="rlFeedback" style="display:none; margin-top:16px; padding:16px; background:#f8fef9; border:1px solid #bbf7d0; border-radius:8px; max-width:900px;">
+      <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px;">✔ Kunci Jawaban — Representation Letter</div>
+      <div style="font-size:12px;color:#444;" id="rlKeyText"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end content-area -->
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  DATA & STATE
+// ═══════════════════════════════════════════════════════
+let jkkRows = [];
+let checked = false;
+
+// ─── KUNCI JAWABAN JKK — 60 Jurnal Koreksi ───────────────────────────────────
+const JKK_KEY = [
+  // 1 — Koreksi salah catat 2x pada PT Krakatau (Rucofin SP1500)
+  { no:1,  tgl:"31/12/18", akun:"Penjualan",                                    debit:10000000,  kredit:0 },
+  { no:"", tgl:"",         akun:"PPN Keluaran",                                  debit:1000000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Piutang Usaha - PT Krakatau",                   debit:0,         kredit:11000000 },
+  { no:"", tgl:"",         akun:"Persediaan (Rucofin SP1500)",                   debit:7955000,   kredit:0 },
+  { no:"", tgl:"",         akun:"HPP",                                           debit:0,         kredit:7955000 },
+  // 2 — Penjualan batal dikirim PT Sejahtera (Rucofin SP1000)
+  { no:2,  tgl:"31/12/18", akun:"Penjualan",                                    debit:20000000,  kredit:0 },
+  { no:"", tgl:"",         akun:"PPN Keluaran",                                  debit:2000000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Piutang Usaha - PT Sejahtera",                  debit:0,         kredit:22000000 },
+  { no:"", tgl:"",         akun:"Persediaan Rucofin SP 1000",                    debit:15910000,  kredit:0 },
+  { no:"", tgl:"",         akun:"HPP",                                           debit:0,         kredit:15910000 },
+  // 3 — Koreksi salah catat pesanan PT Usaha Lancar
+  { no:3,  tgl:"31/12/18", akun:"Piutang Usaha - PT Usaha Lancar",              debit:198000000, kredit:0 },
+  { no:"", tgl:"",         akun:"Penjualan",                                     debit:0,         kredit:180000000 },
+  { no:"", tgl:"",         akun:"PPN Keluaran",                                  debit:0,         kredit:18000000 },
+  // 4 — Koreksi pelunasan piutang PT Lestari salah catat
+  { no:4,  tgl:"31/12/18", akun:"Piutang Usaha - PT Zebra",                     debit:15000000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Kas",                                           debit:0,         kredit:15000000 },
+  { no:"", tgl:"",         akun:"Kas",                                           debit:15000000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Piutang Usaha - PT Lestari",                    debit:0,         kredit:15000000 },
+  // 5 — Hapus piutang PT Orientasi yang pailit
+  { no:5,  tgl:"31/12/18", akun:"Piutang tak tertagih",                         debit:11000000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Piutang Usaha - PT Orientasi",                  debit:0,         kredit:11000000 },
+  // 6 — Pelunasan PT Tempo dicuri karyawan
+  { no:6,  tgl:"31/12/18", akun:"Piutang lain-lain",                            debit:15000000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Piutang Usaha - PT Tempo",                      debit:0,         kredit:15000000 },
+  // 7 — Pelunasan PT Wahana belum dikliringkan kasir
+  { no:7,  tgl:"31/12/18", akun:"Kas",                                          debit:1500000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Piutang Usaha - PT Wahana",                     debit:0,         kredit:1500000 },
+  // 8 — Koreksi pencatatan pelunasan PT Zeira
+  { no:8,  tgl:"31/12/18", akun:"Kas",                                          debit:400000,    kredit:0 },
+  { no:"", tgl:"",         akun:"Piutang Usaha - PT Zeira",                      debit:0,         kredit:400000 },
+  // 9 — Barang konsinyasi PT Unicorn (Rucofin SP 500)
+  { no:9,  tgl:"31/12/18", akun:"Piutang Usaha - PT Unicorn",                   debit:35002000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Persediaan barang jadi (Rucofin SP 500)",       debit:0,         kredit:31820000 },
+  { no:"", tgl:"",         akun:"PPN Keluaran",                                  debit:0,         kredit:3182000 },
+  // 10 — Sampel promosi
+  { no:10, tgl:"31/12/18", akun:"Beban Promosi",                                debit:17501000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Persediaan barang jadi",                        debit:0,         kredit:15910000 },
+  { no:"", tgl:"",         akun:"PPN - Keluaran",                                debit:0,         kredit:1591000 },
+  // 11 — Upah buruh pabrik belum dibayar
+  { no:11, tgl:"31/12/18", akun:"Persediaan barang dalam proses",               debit:15000000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Utang gaji",                                    debit:0,         kredit:15000000 },
+  // 12 — Bahan baku Polyvinyl dicuri
+  { no:12, tgl:"31/12/18", akun:"Beban lain-lain",                              debit:1350000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Persediaan bahan baku (Polyvinyl)",             debit:0,         kredit:1350000 },
+  // 13 — Pembelian PT Delta belum dicatat
+  { no:13, tgl:"31/12/18", akun:"Persediaan Bahan Baku (PS)",                   debit:8000000,   kredit:0 },
+  { no:"", tgl:"",         akun:"PPN Masukan",                                   debit:800000,    kredit:0 },
+  { no:"", tgl:"",         akun:"Utang Usaha (PT Delta)",                        debit:0,         kredit:8800000 },
+  // 14 — Carton Box rusak akibat banjir
+  { no:14, tgl:"31/12/18", akun:"Beban Lain-lain",                              debit:11000000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Persediaan bahan penolong (Carton Box)",        debit:0,         kredit:11000000 },
+  // 15 — Koreksi pelunasan kepada PT Berkat
+  { no:15, tgl:"31/12/18", akun:"Utang Usaha (PT Berkat)",                      debit:990000,    kredit:0 },
+  { no:"", tgl:"",         akun:"Kas",                                           debit:0,         kredit:990000 },
+  // 16 — Giro belum dikliringkan PT Elang
+  { no:16, tgl:"31/12/18", akun:"Bank (Giro)",                                  debit:2000000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Utang Usaha - PT Elang",                        debit:0,         kredit:2000000 },
+  // 17 — Kas kecil & reklasifikasi beban
+  { no:17, tgl:"31/12/18", akun:"Piutang lain-lain",                            debit:100000,    kredit:0 },
+  { no:"", tgl:"",         akun:"Kas kecil",                                     debit:0,         kredit:100000 },
+  { no:"", tgl:"",         akun:"Beban Perjalanan dinas dan akomodasi",          debit:30000,     kredit:0 },
+  { no:"", tgl:"",         akun:"Beban bensin",                                  debit:20000,     kredit:0 },
+  { no:"", tgl:"",         akun:"Beban lain-lain",                               debit:50000,     kredit:0 },
+  { no:"", tgl:"",         akun:"Kas Kecil",                                     debit:0,         kredit:100000 },
+  // 18 — Kliring uang masuk PT Lestari no.885701
+  { no:18, tgl:"31/12/18", akun:"Bank CAB",                                     debit:10600000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Piutang Usaha - PT Lestari",                    debit:0,         kredit:10600000 },
+  // 19 — Tolakan kliring 28 Des no.1526751
+  { no:19, tgl:"31/12/18", akun:"Piutang Usaha",                                debit:2200000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Bank CAB",                                      debit:0,         kredit:2200000 },
+  // 20 — Bunga jasa giro bank CAB
+  { no:20, tgl:"31/12/18", akun:"Bank CAB",                                     debit:156500,    kredit:0 },
+  { no:"", tgl:"",         akun:"Pendapatan bunga jasa giro",                    debit:0,         kredit:156500 },
+  // 21 — Biaya administrasi bank CAB
+  { no:21, tgl:"31/12/18", akun:"Biaya administrasi bank CAB",                  debit:25000,     kredit:0 },
+  { no:"", tgl:"",         akun:"Bank CAB",                                      debit:0,         kredit:25000 },
+  // 22 — (kosong/tidak ada entri)
+  // 23 — Biaya cek/giro bank Loppo
+  { no:23, tgl:"31/12/18", akun:"Beban lain-lain",                              debit:18000,     kredit:0 },
+  { no:"", tgl:"",         akun:"Bank Loppo",                                    debit:0,         kredit:18000 },
+  // 24 — Bunga jasa giro Bank Loppo
+  { no:24, tgl:"31/12/18", akun:"Bank Loppo",                                   debit:75226,     kredit:0 },
+  { no:"", tgl:"",         akun:"Pendapatan bunga jasa giro",                    debit:0,         kredit:75226 },
+  // 25 — Biaya adm bank Loppo
+  { no:25, tgl:"31/12/18", akun:"Biaya adm bank Loppo",                         debit:5000,      kredit:0 },
+  { no:"", tgl:"",         akun:"Bank Loppo",                                    debit:0,         kredit:5000 },
+  // 26 — Koreksi tolakan kliring PT Lestari
+  { no:26, tgl:"31/12/18", akun:"Piutang Usaha - PT Lestari",                   debit:3350000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Bank LOPPO",                                    debit:0,         kredit:3350000 },
+  // 27 — Penyesuaian nilai saham 31 Des 2018
+  { no:27, tgl:"31/12/18", akun:"Investasi pada saham",                         debit:4500000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Pendapatan lain-lain",                          debit:0,         kredit:4500000 },
+  // 28 — Utang pajak sewa Betawi Land (PPh 4(2) 10%)
+  { no:28, tgl:"31/12/18", akun:"PPN-Masukan",                                  debit:3000000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Utang PPh 4 (2)",                               debit:0,         kredit:3000000 },
+  // 29 — Utang pajak sewa Bpk Haryo (PPh 4(2) 20%)
+  { no:29, tgl:"31/12/18", akun:"PPN-Masukan",                                  debit:2000000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Utang PPh 4 (2)",                               debit:0,         kredit:2000000 },
+  // 30 — Pembebanan sewa PT Betawi Land
+  { no:30, tgl:"31/12/18", akun:"Beban sewa",                                   debit:5000000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Sewa dibayar dimuka",                           debit:0,         kredit:5000000 },
+  // 31 — Pembebanan sewa Bpk Haryo
+  { no:31, tgl:"31/12/18", akun:"Beban sewa",                                   debit:1666667,   kredit:0 },
+  { no:"", tgl:"",         akun:"Sewa dibayar dimuka",                           debit:0,         kredit:1666667 },
+  // 32 — Polis asuransi 3575 Bangunan
+  { no:32, tgl:"31/12/18", akun:"Beban Asuransi",                               debit:11250000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Asuransi dibayar dimuka",                       debit:0,         kredit:11250000 },
+  // 33 — Polis asuransi 3576 Perabot
+  { no:33, tgl:"31/12/18", akun:"Beban Asuransi",                               debit:900000,    kredit:0 },
+  { no:"", tgl:"",         akun:"Asuransi dibayar dimuka",                       debit:0,         kredit:900000 },
+  // 34 — Polis asuransi 3764 Kendaraan
+  { no:34, tgl:"31/12/18", akun:"Beban Asuransi",                               debit:1750000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Asuransi dibayar dimuka",                       debit:0,         kredit:1750000 },
+  // 35 — Polis asuransi 3876 Persediaan
+  { no:35, tgl:"31/12/18", akun:"Beban Asuransi",                               debit:5400000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Asuransi dibayar dimuka",                       debit:0,         kredit:5400000 },
+  // 36 — Penyertaan PT Piglet (equity) & PT Pooh (cost)
+  { no:36, tgl:"31/12/18", akun:"Piutang lain-lain",                            debit:6800000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Investasi",                                     debit:0,         kredit:4800000 },
+  { no:"", tgl:"",         akun:"Pendapatan lain-lain",                          debit:0,         kredit:2000000 },
+  // 37 — Laba PT Piglet belum dicatat
+  { no:37, tgl:"31/12/18", akun:"Investasi",                                    debit:30000000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Pendapatan lain-lain",                          debit:0,         kredit:30000000 },
+  // 38 — Reklasifikasi pembayaran dimuka untuk gedung
+  { no:38, tgl:"31/12/18", akun:"Aset lainnya",                                 debit:22500000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Investasi",                                     debit:0,         kredit:22500000 },
+  // 39 — Koreksi pembayaran PPN atas KMS
+  { no:39, tgl:"31/12/18", akun:"Bangunan dan Prasarana",                       debit:30000000,  kredit:0 },
+  { no:"", tgl:"",         akun:"PPN-Keluaran",                                  debit:0,         kredit:30000000 },
+  // 40 — Reklasifikasi PBB dari Bangunan dan Prasarana
+  { no:40, tgl:"31/12/18", akun:"Beban lain-lain",                              debit:100000000, kredit:0 },
+  { no:"", tgl:"",         akun:"Bangunan dan Prasarana",                        debit:0,         kredit:100000000 },
+  // 41 — Koreksi tukar tambah truk Nissan
+  { no:41, tgl:"31/12/18", akun:"Kendaraan bermotor baru",                      debit:59371000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Akumulasi penyusutan - truk Nissan",            debit:16000000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Regi Pelepasan Aset Tetap",                     debit:4629000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Kendaraan bermotor lama",                       debit:0,         kredit:80000000 },
+  // 42 — Koreksi bunga dimasukkan ke harga perolehan sewa pembiayaan
+  { no:42, tgl:"31/12/18", akun:"Utang sewa pembiayaan - jangka panjang",       debit:27981000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Aset tetap sewa pembiayaan",                    debit:0,         kredit:27981000 },
+  // 43 — Reklasifikasi akun kendaraan bermotor → aset tetap sewa pembiayaan
+  { no:43, tgl:"31/12/18", akun:"Aset tetap sewa pembiayaan",                   debit:160000000, kredit:0 },
+  { no:"", tgl:"",         akun:"Kendaraan bermotor",                            debit:0,         kredit:160000000 },
+  // 44 — Beban penyusutan sewa guna (10 bulan)
+  { no:44, tgl:"31/12/18", akun:"Beban Penyusutan aktiva tetap sewa guna",      debit:22003167,  kredit:0 },
+  { no:"", tgl:"",         akun:"Akumulasi penyusutan sewa guna",                debit:0,         kredit:22003167 },
+  // 45 — Tambah nilai peralatan kantor (PPnBM & beban lainnya)
+  { no:45, tgl:"31/12/18", akun:"Peralatan Kantor",                             debit:9890000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Beban lain-lain",                               debit:0,         kredit:9890000 },
+  // 46 — Koreksi akumulasi penyusutan & laba penjualan komputer Wernes
+  { no:46, tgl:"31/12/18", akun:"Laba atas penjualan aktiva tetap",             debit:400000,    kredit:0 },
+  { no:"", tgl:"",         akun:"Akumulasi penyusutan - peralatan kantor",       debit:1600000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Peralatan Kantor",                              debit:0,         kredit:2000000 },
+  // 47 — Koreksi beban penyusutan tahun 2018
+  { no:47, tgl:"31/12/18", akun:"Akumulasi penyusutan Bangunan dan Prasarana",  debit:67250000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Akumulasi penyusutan Kendaraan bermotor",       debit:176181600, kredit:0 },
+  { no:"", tgl:"",         akun:"Akumulasi penyusutan peralatan kantor",         debit:15489200,  kredit:0 },
+  { no:"", tgl:"",         akun:"Beban penyusutan produksi tak langsung",        debit:0,         kredit:67250000 },
+  { no:"", tgl:"",         akun:"Beban penyusutan aktiva tetap",                 debit:0,         kredit:191670800 },
+  // 48 — Reklasifikasi utang sewa PT Ciptaning jatuh tempo <12 bulan
+  { no:48, tgl:"31/12/18", akun:"Utang sewa pembiayaan - jangka panjang",       debit:20480000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Utang sewa pembiayaan - jangka pendek",         debit:0,         kredit:20480000 },
+  // 49 — Reklasifikasi utang sewa PT Maju jatuh tempo <12 bulan
+  { no:49, tgl:"31/12/18", akun:"Utang sewa pembiayaan - jangka panjang",       debit:48000000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Utang sewa pembiayaan - jangka pendek",         debit:0,         kredit:48000000 },
+  // 50 — Koreksi bunga sewa pembiayaan PT Maju
+  { no:50, tgl:"31/12/18", akun:"Utang sewa pembiayaan - jangka panjang",       debit:27981000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Aset tetap sewa pembiayaan",                    debit:0,         kredit:27981000 },
+  // 51 — Koreksi pencatatan beban bunga sewa yang belum diakui
+  { no:51, tgl:"31/12/18", akun:"Beban Bunga sewa",                             debit:9327000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Utang sewa pembiayaan - jangka panjang",        debit:0,         kredit:9327000 },
+  // 52 — Reklasifikasi Utang PPh Pasal 21
+  { no:52, tgl:"31/12/18", akun:"Utang PPh Pasal 21",                           debit:19877000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Beban lain-lain",                               debit:0,         kredit:19877000 },
+  // 53 — Reklasifikasi beban komisi penjualan
+  { no:53, tgl:"31/12/18", akun:"Beban Komisi Penjualan",                       debit:60000000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Perjalanan dinas & Akomodasi",                  debit:0,         kredit:60000000 },
+  // 54 — Reklasifikasi beban lain-lain → perlengkapan kantor
+  { no:54, tgl:"31/12/18", akun:"Beban lain-lain",                              debit:4500000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Perlengkapan kantor",                           debit:0,         kredit:4500000 },
+  // 55 — Reklasifikasi penjualan kardus → pendapatan lain-lain
+  { no:55, tgl:"31/12/18", akun:"Representasi & Jamuan",                        debit:20000000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Pendapatan lain-lain",                          debit:0,         kredit:20000000 },
+  // 56 — Biaya berobat karyawan kurang catat
+  { no:56, tgl:"31/12/18", akun:"Kesejahteraan karyawan",                       debit:90000000,  kredit:0 },
+  { no:"", tgl:"",         akun:"Bank LOPPO",                                    debit:0,         kredit:90000000 },
+  // 57 — PPh 23 atas jasa profesional
+  { no:57, tgl:"31/12/18", akun:"Beban jasa profesional",                       debit:1400000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Utang PPh 23",                                  debit:0,         kredit:1400000 },
+  // 58 — PPh Pasal 21 karyawan lebih potong
+  { no:58, tgl:"31/12/18", akun:"Utang PPh Pasal 21",                           debit:8640000,   kredit:0 },
+  { no:"", tgl:"",         akun:"Biaya yang masih harus dibayar",                debit:0,         kredit:8640000 },
+  // 59 — Pindah utang PPh 21 debit ke uang muka PPh
+  { no:59, tgl:"31/12/18", akun:"Uang Muka PPh 21",                             debit:19813750,  kredit:0 },
+  { no:"", tgl:"",         akun:"Utang PPh Pasal 21",                            debit:0,         kredit:19813750 },
+  // 60 — Koreksi pembebanan pajak penghasilan 2018
+  { no:60, tgl:"31/12/18", akun:"Beban Pajak Penghasilan",                      debit:191934223, kredit:0 },
+  { no:"", tgl:"",         akun:"Utang Pajak PPh Pasal 25/29",                   debit:0,         kredit:191934223 },
+];
+
+// ARP 2.1 — Neraca ASET
+// v17 = Per Audit 31/12/2017 | v18 = kunci jawaban Per Audit 31/12/2018
+const ARP21_DATA = [
+  { label:"ASET", type:"group" },
+  { label:"Aset Lancar", type:"group" },
+  { label:"Kas dan setara kas",              v17:67695350,    v18:59262550,     type:"row" },
+  { label:"Investasi jangka pendek",         v17:1200000000,  v18:1715000000,   type:"row" },
+  { label:"Piutang usaha",                   v17:8497922298,  v18:12155973249,  type:"row" },
+  { label:"Piutang lain-lain",               v17:65000000,    v18:100000000,    type:"row" },
+  { label:"Persediaan",                      v17:1808167030,  v18:2712278700,   type:"row" },
+  { label:"Beban dibayar dimuka",            v17:40000000,    v18:55866667,     type:"row" },
+  { label:"Total aset lancar",               v17:11678784678, v18:16798381166,  type:"total" },
+  { label:"Investasi pada entitas asosiasi", v17:0,           v18:425200000,    type:"row" },
+  { label:"Aset tetap", type:"group" },
+  { label:"Harga Perolehan",                 v17:4403670000,  v18:6799069000,   type:"row" },
+  { label:"Akumulasi Penyusutan",            v17:472468000,   v18:782142167,    type:"row" },
+  { label:"Nilai buku",                      v17:3931202000,  v18:6071526833,   type:"total" },
+  { label:"Aset lainnya",                    v17:386573000,   v18:0,            type:"row" },
+  { label:"Total Aset",                      v17:15996559678, v18:22869907999,  type:"total-bold" },
+];
+
+// ARP 2.2 — Kewajiban & Ekuitas
+const ARP22_DATA = [
+  { label:"KEWAJIBAN DAN EKUITAS", type:"group" },
+  { label:"Kewajiban jangka pendek", type:"group" },
+  { label:"Pinjaman bank & cerukan",              v17:200000000,   v18:200000000,    type:"row" },
+  { label:"Utang usaha",                          v17:1068203500,  v18:1278926100,   type:"row" },
+  { label:"Utang lain-lain",                      v17:29185800,    v18:191193058,    type:"row" },
+  { label:"Utang pajak",                          v17:133753747,   v18:599897645,    type:"row" },
+  { label:"Biaya yang masih harus dibayar",       v17:5787490,     v18:162088980,    type:"row" },
+  { label:"Utang bank",                           v17:833304163,   v18:0,            type:"row" },
+  { label:"Utang sewa pembiayaan",                v17:30720000,    v18:68480000,     type:"row" },
+  { label:"Total kewajiban jangka pendek",        v17:2300954700,  v18:2590586626,   type:"total" },
+  { label:"Kewajiban jangka panjang", type:"group" },
+  { label:"Utang bank",                           v17:8235352644,  v18:10175357444,  type:"row" },
+  { label:"Utang sewa pembiayaan jangka panjang", v17:20480000,    v18:103134000,    type:"row" },
+  { label:"Total kewajiban jangka panjang",       v17:8255832644,  v18:10278491444,  type:"total" },
+  { label:"EKUITAS", type:"group" },
+  { label:"Modal saham - Rp 2.200.000 per lembar", v17:2220000000, v18:2220000000,  type:"row" },
+  { label:"Saldo laba",                           v17:3219772334,  v18:6674924978,   type:"row" },
+  { label:"Total ekuitas",                        v17:5439772334,  v18:8894924978,   type:"total" },
+  { label:"Total Kewajiban dan ekuitas",          v17:15996559678, v18:21763003048,  type:"total-bold" },
+];
+
+// ARP 2.3 — Laba Rugi
+const ARP23_DATA = [
+  { label:"PENJUALAN - NETO",           v17:30621597850, v18:42586834000,  type:"total" },
+  { label:"BEBAN POKOK PENJUALAN",      v17:24883531468, v18:33216197959,  type:"row" },
+  { label:"LABA BRUTO",                 v17:5738066382,  v18:9370636041,   type:"total" },
+  { label:"BEBAN USAHA",                v17:1858952040,  v18:2630694255,   type:"row" },
+  { label:"LABA USAHA",                 v17:3879114342,  v18:6739941786,   type:"total" },
+  { label:"(PENDAPATAN) DAN BEBAN LAIN-LAIN", type:"group" },
+  { label:"(Laba) / rugi aset tetap",   v17:0,           v18:-2500000,     type:"row" },
+  { label:"(Laba) / rugi valuta asing", v17:105300600,   v18:120500600,    type:"row" },
+  { label:"Pendapatan bunga",           v17:-8654500,    v18:-9696765,     type:"row" },
+  { label:"Beban bunga",                v17:1886400000,  v18:2101607415,   type:"row" },
+  { label:"BEBAN LAIN-LAIN—NETO",       v17:1983046100,  v18:2209911250,   type:"total" },
+  { label:"LABA SEBELUM PAJAK",         v17:1896068242,  v18:4530030536,   type:"total" },
+  { label:"BEBAN PAJAK PENGHASILAN",    v17:437336772,   v18:1074877892,   type:"row" },
+  { label:"LABA NETO",                  v17:1458731470,  v18:3455152644,   type:"total-bold" },
+];
+
+const RL_FIELDS = [
+  { id:"rl_date1", label:"Tahun (tanggal pertama)", expected:"2018" },
+  { id:"rl_date2", label:"Tahun (tanggal kedua)", expected:"2017" },
+  { id:"rl_year1", label:"Tahun buku pertama (paragraf)", expected:"2018" },
+  { id:"rl_year2", label:"Tahun buku kedua (paragraf)", expected:"2017" },
+  { id:"rl_pb1",   label:"Tahun piutang pertama", expected:"2018" },
+  { id:"rl_pb2",   label:"Tahun piutang kedua", expected:"2017" },
+  { id:"rl_piutang", label:"Jumlah piutang", expected:"piutang" },
+  { id:"rl_metode", label:"Metode penilaian persediaan", expected:"masuk-pertama keluar-pertama (FIFO)" },
+  { id:"rl_depresiasi", label:"Metode depresiasi", expected:"garis lurus" },
+  { id:"rl_director", label:"Nama Direktur Utama", expected:"" },
+];
+
+// ═══════════════════════════════════════════════════════
+//  TAB SWITCHING (main)
+// ═══════════════════════════════════════════════════════
+function switchTab(idx, btn) {
+  document.querySelectorAll('.tab-pane').forEach((p,i) => {
+    p.classList.toggle('active', i === idx);
+  });
+  document.querySelectorAll('.tab-bar > .tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', i === idx);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  ARP SUB-TAB SWITCHING
+// ═══════════════════════════════════════════════════════
+function switchARP(idx) {
+  for (let i=0; i<3; i++) {
+    document.getElementById('arpPane'+i).style.display = i===idx ? 'block' : 'none';
+    const btn = document.getElementById('arpTab'+i+'btn');
+    if (btn) btn.classList.toggle('active', i===idx);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  ARP TABLE BUILDER
+// ═══════════════════════════════════════════════════════
+function fmtSigned(n) {
+  // Display with sign, handle negative values properly
+  const abs = Math.round(Math.abs(n)).toLocaleString('id-ID');
+  if (n < 0) return '(' + abs + ')';
+  if (n > 0) return abs;
+  return '—';
+}
+
+function buildARPTable(tbodyId, dataArr) {
+  const tbody = document.getElementById(tbodyId);
+  tbody.innerHTML = '';
+  dataArr.forEach((row, idx) => {
+    const tr = document.createElement('tr');
+    tr.dataset.rowIdx = idx;
+    if (row.type === 'group') {
+      tr.innerHTML = `
+        <td colspan="6" style="background:#e8ecf6;font-weight:700;font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--navy);padding:8px 10px;">${row.label}</td>
+      `;
+    } else {
+      const isTotal  = row.type === 'total' || row.type === 'total-bold';
+      const isBold   = row.type === 'total-bold';
+      const bg       = isTotal ? 'background:#f0f3fa;' : '';
+      const fw       = isTotal ? 'font-weight:600;' : '';
+      const fwBold   = isBold  ? 'font-weight:700;' : '';
+      // v17 display: negatives shown in parens
+      const v17raw   = row.v17 ?? 0;
+      const v17disp  = v17raw === 0 ? '-' : fmtSigned(v17raw);
+      const v18key   = row.v18 ?? 0;
+
+      tr.innerHTML = `
+        <td style="text-align:center;font-size:11px;color:var(--muted);width:36px;${bg}"></td>
+        <td style="${bg}${fw}${fwBold}padding:7px 10px;font-size:13px;">${row.label}</td>
+        <td style="text-align:right;font-size:13px;font-feature-settings:'tnum';${bg}${fw}padding:7px 10px;white-space:nowrap;">${v17disp}</td>
+        <td style="padding:5px 6px;${bg}position:relative;">
+          <input class="cell-input money arp-v18-input"
+            value=""
+            placeholder="${v17raw===0?'-':'0'}"
+            data-key="${v18key}"
+            data-v17="${v17raw}"
+            oninput="calcThisARPRow(this)"
+            style="${fw}${fwBold}${isTotal?'background:#fafbff;':''}">
+          <span class="arp-row-badge" style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none;"></span>
+        </td>
+        <td class="arp-diff-cell" style="text-align:right;font-size:13px;${fw}color:var(--muted);${bg}padding:7px 10px;white-space:nowrap;">—</td>
+        <td class="arp-pct-cell"  style="text-align:right;font-size:13px;${fw}color:var(--muted);${bg}padding:7px 10px;white-space:nowrap;">—</td>
+      `;
+    }
+    tbody.appendChild(tr);
+  });
+}
+
+function calcThisARPRow(input) {
+  const tr = input.closest('tr');
+  const v17 = parseFloat(input.dataset.v17) || 0;
+  const v18 = parseFloat(input.value) || 0;
+  const diff = v18 - v17;
+  const pct  = v17 !== 0 ? ((diff / v17) * 100).toFixed(1) : (v18 !== 0 ? '∞' : '—');
+  const diffCell = tr.querySelector('.arp-diff-cell');
+  const pctCell  = tr.querySelector('.arp-pct-cell');
+  diffCell.textContent = (v18 === 0 && v17 === 0) ? '—' : fmtSigned(diff);
+  diffCell.style.color = diff >= 0 ? 'var(--green)' : 'var(--red)';
+  pctCell.textContent  = (typeof pct === 'string' && pct === '—') ? '—'
+    : (typeof pct === 'string' && pct === '∞') ? '∞%'
+    : (diff >= 0 ? '+' : '') + pct + '%';
+  pctCell.style.color  = diff >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
+// ═══════════════════════════════════════════════════════
+//  JKK TABLE
+// ═══════════════════════════════════════════════════════
+function addJKKRow(data={}) {
+  const tbody = document.getElementById('jkkBody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input class="cell-input" style="width:40px;" value="${data.no||''}" placeholder="#"></td>
+    <td><input class="cell-input" style="width:72px;" value="${data.tgl||''}" placeholder="dd/mm/yy"></td>
+    <td><input class="cell-input" value="${data.akun||''}" placeholder="Nama akun / keterangan…"></td>
+    <td><input class="cell-input" style="width:72px;" value="${data.ref||''}" placeholder="Ref"></td>
+    <td><input class="cell-input money jkk-debit" value="${data.debit||''}" placeholder="0" oninput="updateTotals()"></td>
+    <td><input class="cell-input money jkk-kredit" value="${data.kredit||''}" placeholder="0" oninput="updateTotals()"></td>
+    <td class="no-print" style="text-align:center;">
+      <button onclick="this.closest('tr').remove();updateTotals();" style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:16px;line-height:1;">×</button>
+    </td>
+  `;
+  tbody.appendChild(tr);
+  updateTotals();
+}
+
+function updateTotals() {
+  let d=0, k=0;
+  document.querySelectorAll('.jkk-debit').forEach(i => { d += parseFloat(i.value)||0; });
+  document.querySelectorAll('.jkk-kredit').forEach(i => { k += parseFloat(i.value)||0; });
+  const s = d - k;
+  document.getElementById('totalDebit').textContent  = 'Rp '+fmt(d);
+  document.getElementById('totalKredit').textContent = 'Rp '+fmt(k);
+  const sel = document.getElementById('totalSelisih');
+  sel.textContent = 'Rp '+fmt(Math.abs(s));
+  sel.style.color = s === 0 ? 'var(--green)' : 'var(--red)';
+}
+
+function fmt(n) {
+  if (n === 0) return '0';
+  return Math.round(Math.abs(n)).toLocaleString('id-ID');
+}
+
+// ═══════════════════════════════════════════════════════
+//  VALIDATION
+// ═══════════════════════════════════════════════════════
+function validateAll() {
+  const missing = [];
+
+  // 1. Identitas mahasiswa
+  if (!document.getElementById('studentName').value.trim()) missing.push('Nama Mahasiswa');
+  if (!document.getElementById('studentNIM').value.trim())  missing.push('NIM');
+  if (!document.getElementById('studentClass').value.trim()) missing.push('Kelas');
+
+  // 2. JKK — minimal 1 baris terisi (debit atau kredit)
+  let jkkFilled = 0;
+  document.querySelectorAll('#jkkBody tr').forEach(tr => {
+    const d = tr.querySelector('.jkk-debit');
+    const k = tr.querySelector('.jkk-kredit');
+    if ((d && parseFloat(d.value)) || (k && parseFloat(k.value))) jkkFilled++;
+  });
+  if (jkkFilled === 0) missing.push('Jurnal Koreksi (Tab 1) — minimal 1 baris terisi');
+
+  // 3. ARP — semua input v18 harus terisi (skip rows where v17=0 and expected key=0)
+  const arpInputs = document.querySelectorAll('.arp-v18-input');
+  let arpEmpty = 0;
+  arpInputs.forEach(inp => {
+    const keyVal = parseFloat(inp.dataset.key);
+    // If key is 0, placeholder '-' is acceptable (leave blank = 0 is ok)
+    if (keyVal !== 0 && inp.value.trim() === '') arpEmpty++;
+  });
+  if (arpEmpty > 0) missing.push(`ARP (Tab 2) — masih ada ${arpEmpty} kolom 2018 yang kosong`);
+
+  // 4. Representation Letter — semua letter-input harus terisi
+  const rlInputs = document.querySelectorAll('#repLetter .letter-input');
+  let rlEmpty = 0;
+  rlInputs.forEach(inp => { if (!inp.value.trim()) rlEmpty++; });
+  if (rlEmpty > 0) missing.push(`Representation Letter (Tab 3) — masih ada ${rlEmpty} field yang kosong`);
+
+  return missing;
+}
+
+function showValidation(missing) {
+  const msg  = document.getElementById('validationMsg');
+  const list = document.getElementById('validationList');
+  if (missing.length === 0) {
+    msg.style.display = 'none';
+    return true;
+  }
+  list.innerHTML = missing.map(m => `• ${m}`).join('<br>');
+  msg.style.display = 'block';
+  // Scroll to message
+  msg.scrollIntoView({ behavior:'smooth', block:'center' });
+  return false;
+}
+
+// ═══════════════════════════════════════════════════════
+//  CHECK ANSWERS
+// ═══════════════════════════════════════════════════════
+function checkAnswers() {
+  // Run validation first
+  const missing = validateAll();
+  if (!showValidation(missing)) return;
+
+  if (checked) { alert('Jawaban sudah diperiksa. Muat ulang halaman untuk mencoba lagi.'); return; }
+  checked = true;
+
+  // Hide validation message
+  document.getElementById('validationMsg').style.display = 'none';
+
+  // Lock all inputs
+  document.querySelectorAll('input, textarea').forEach(el => {
+    if (!el.closest('.identity-card')) el.setAttribute('readonly','readonly');
+  });
+
+  let correct = 0, total = 0;
+
+  // --- JKK: debit/kredit balance ---
+  const keyDebit  = JKK_KEY.reduce((s,r) => s+(r.debit||0), 0);
+  const keyKredit = JKK_KEY.reduce((s,r) => s+(r.kredit||0), 0);
+  let userDebit=0, userKredit=0;
+  document.querySelectorAll('.jkk-debit').forEach(i => userDebit += parseFloat(i.value)||0);
+  document.querySelectorAll('.jkk-kredit').forEach(i => userKredit += parseFloat(i.value)||0);
+  total += 2;
+  if (Math.abs(userDebit - keyDebit) < 1000) correct++;
+  if (Math.abs(userKredit - keyKredit) < 1000) correct++;
+
+  const jkkKeyLines = (() => {
+    let html = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">';
+    html += `<thead><tr style="background:#dcfce7;font-weight:600;">
+      <th style="text-align:left;padding:4px 8px;width:36px;">No.</th>
+      <th style="text-align:left;padding:4px 8px;">Keterangan / Akun</th>
+      <th style="text-align:right;padding:4px 8px;width:130px;">Debit (Rp)</th>
+      <th style="text-align:right;padding:4px 8px;width:130px;">Kredit (Rp)</th>
+    </tr></thead><tbody>`;
+    JKK_KEY.forEach(r => {
+      const isHeader = r.no !== "";
+      const bg = isHeader ? 'background:#f0fdf4;font-weight:600;' : '';
+      const indent = !isHeader ? 'padding-left:24px;' : '';
+      const dStr = r.debit  ? r.debit.toLocaleString('id-ID')  : '';
+      const kStr = r.kredit ? r.kredit.toLocaleString('id-ID') : '';
+      html += `<tr style="${bg}border-bottom:1px solid #e0f2e9;">
+        <td style="padding:3px 8px;color:#888;">${r.no||''}</td>
+        <td style="padding:3px 8px;${indent}">${r.akun}</td>
+        <td style="text-align:right;padding:3px 8px;font-feature-settings:'tnum';">${dStr}</td>
+        <td style="text-align:right;padding:3px 8px;font-feature-settings:'tnum';">${kStr}</td>
+      </tr>`;
+    });
+    const totalD = JKK_KEY.reduce((s,r)=>s+(r.debit||0),0);
+    const totalK = JKK_KEY.reduce((s,r)=>s+(r.kredit||0),0);
+    html += `<tr style="background:#dcfce7;font-weight:700;border-top:2px solid #86efac;">
+      <td colspan="2" style="padding:5px 8px;">TOTAL</td>
+      <td style="text-align:right;padding:5px 8px;font-feature-settings:'tnum';">${totalD.toLocaleString('id-ID')}</td>
+      <td style="text-align:right;padding:5px 8px;font-feature-settings:'tnum';">${totalK.toLocaleString('id-ID')}</td>
+    </tr>`;
+    html += '</tbody></table></div>';
+    return html;
+  })();
+  document.getElementById('jkkKeyText').innerHTML =
+    `<div style="font-weight:700;color:var(--green);margin-bottom:8px;">✔ Kunci Jawaban — 60 Jurnal Koreksi</div>` +
+    jkkKeyLines +
+    `<div style="margin-top:10px;font-size:12px;">
+      <b>Total Debit Kunci: Rp ${JKK_KEY.reduce((s,r)=>s+(r.debit||0),0).toLocaleString('id-ID')}</b> &nbsp;|&nbsp;
+      <b>Total Kredit Kunci: Rp ${JKK_KEY.reduce((s,r)=>s+(r.kredit||0),0).toLocaleString('id-ID')}</b><br>
+      Total Debit Anda: Rp ${fmt(userDebit)} ${Math.abs(userDebit-keyDebit)<1000?'<span style="color:var(--green)">✔</span>':'<span style="color:var(--red)">✗</span>'} &nbsp;|&nbsp;
+      Total Kredit Anda: Rp ${fmt(userKredit)} ${Math.abs(userKredit-keyKredit)<1000?'<span style="color:var(--green)">✔</span>':'<span style="color:var(--red)">✗</span>'}
+    </div>`;
+
+  document.getElementById('jkkFeedback').style.display = 'block';
+
+  // --- ARP: per-row grading across all three tables ---
+  const TOLERANCE = 500; // Rp 500 tolerance for rounding differences
+  let arpCorrect = 0, arpTotal = 0;
+
+  function gradeARPTable(tbodyId, dataArr, paneName) {
+    const inputs = document.querySelectorAll(`#${tbodyId} .arp-v18-input`);
+    let paneCorrect = 0, paneTotal = 0;
+    // Map inputs to data rows (skip group rows which have no input)
+    const dataRows = dataArr.filter(r => r.type !== 'group');
+    inputs.forEach((input, idx) => {
+      const dataRow = dataRows[idx];
+      if (!dataRow || dataRow.v18 === undefined) return;
+      paneTotal++; arpTotal++; total++;
+      const userVal = parseFloat(input.value) || 0;
+      const keyVal  = dataRow.v18;
+      const ok = Math.abs(userVal - keyVal) <= TOLERANCE;
+      if (ok) { paneCorrect++; arpCorrect++; correct++; }
+      // Visual badge on the input cell
+      const badge = input.parentNode.querySelector('.arp-row-badge');
+      if (badge) {
+        badge.style.display = 'inline';
+        badge.textContent   = ok ? '✔' : '✗';
+        badge.style.color   = ok ? 'var(--green)' : 'var(--red)';
+      }
+      // Colour the input border
+      input.style.borderColor = ok ? 'var(--green)' : 'var(--red)';
+      // If wrong, show the correct value as placeholder hint
+      if (!ok) {
+        input.style.background = '#fff5f5';
+        input.title = `Kunci: ${fmtSigned(keyVal)}`;
+      }
+    });
+    return { paneCorrect, paneTotal };
+  }
+
+  const r21 = gradeARPTable('arp21Body', ARP21_DATA, 'arpPane0');
+  const r22 = gradeARPTable('arp22Body', ARP22_DATA, 'arpPane1');
+  const r23 = gradeARPTable('arp23Body', ARP23_DATA, 'arpPane2');
+
+  // Build ARP answer-key summary panels
+  function buildARPKeyPanel(panelId, dataArr, title) {
+    let panel = document.getElementById(panelId);
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = panelId;
+      panel.style.cssText = 'margin-top:14px;padding:14px 16px;background:#f8fef9;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:#333;';
+    }
+    const dataRows = dataArr.filter(r => r.type !== 'group' && r.v18 !== undefined);
+    const lines = dataRows.map(r => {
+      const v18disp = r.v18 === 0 ? '0' : fmtSigned(r.v18);
+      const v17disp = r.v17 === 0 ? '0' : fmtSigned(r.v17);
+      const diff    = r.v18 - r.v17;
+      const pct     = r.v17 !== 0 ? ((diff/r.v17)*100).toFixed(1)+'%' : (r.v18 !== 0 ? '∞%' : '—');
+      const isTotal = r.type === 'total' || r.type === 'total-bold';
+      const fw      = isTotal ? 'font-weight:700;' : '';
+      return `<tr style="${fw}border-bottom:1px solid #e0f2e9;">
+        <td style="padding:3px 8px;">${r.label}</td>
+        <td style="text-align:right;padding:3px 8px;font-feature-settings:'tnum';">${v17disp}</td>
+        <td style="text-align:right;padding:3px 8px;font-feature-settings:'tnum';color:var(--navy);">${v18disp}</td>
+        <td style="text-align:right;padding:3px 8px;font-feature-settings:'tnum';color:${diff>=0?'var(--green)':'var(--red)'};">${fmtSigned(diff)}</td>
+        <td style="text-align:right;padding:3px 8px;color:${diff>=0?'var(--green)':'var(--red)'};">${pct}</td>
+      </tr>`;
+    }).join('');
+    panel.innerHTML = `
+      <div style="font-weight:700;color:var(--green);margin-bottom:8px;">✔ Kunci Jawaban — ${title}</div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead>
+            <tr style="background:#dcfce7;font-weight:600;">
+              <th style="text-align:left;padding:4px 8px;">Keterangan</th>
+              <th style="text-align:right;padding:4px 8px;">2017</th>
+              <th style="text-align:right;padding:4px 8px;">2018 (Kunci)</th>
+              <th style="text-align:right;padding:4px 8px;">Selisih</th>
+              <th style="text-align:right;padding:4px 8px;">%</th>
+            </tr>
+          </thead>
+          <tbody>${lines}</tbody>
+        </table>
+      </div>`;
+    return panel;
+  }
+
+  // Inject key panels below each ARP conclusion card
+  const panes = ['arpPane0','arpPane1','arpPane2'];
+  const titles = ['ARP 2.1 — Neraca Aset', 'ARP 2.2 — Kewajiban & Ekuitas', 'ARP 2.3 — Laba Rugi'];
+  const datas  = [ARP21_DATA, ARP22_DATA, ARP23_DATA];
+  panes.forEach((pid, i) => {
+    const panel = buildARPKeyPanel('arpKey'+i, datas[i], titles[i]);
+    document.getElementById(pid).appendChild(panel);
+  });
+
+  // --- RL Fields ---
+  let rlCorrect = 0, rlTotal = 0;
+  RL_FIELDS.forEach(f => {
+    if (!f.expected) return;
+    rlTotal++; total++;
+    const el = document.getElementById(f.id);
+    if (!el) return;
+    const val = (el.value||'').trim().toLowerCase();
+    const exp = f.expected.toLowerCase();
+    const ok  = val === exp || (f.expected==='piutang' && val.replace(/\D/g,'').length > 3);
+    if (ok) { correct++; rlCorrect++; }
+    const badge = document.createElement('span');
+    badge.className = 'feedback-icon show ' + (ok ? 'correct' : 'wrong');
+    badge.textContent = ok ? ' ✔' : ' ✗';
+    el.parentNode.insertBefore(badge, el.nextSibling);
+  });
+
+  const rlKeyLines = RL_FIELDS.filter(f => f.expected)
+    .map(f => `<b>${f.label}:</b> ${f.expected||'(bebas)'}`)
+    .join('<br>');
+  document.getElementById('rlKeyText').innerHTML = rlKeyLines;
+  document.getElementById('rlFeedback').style.display = 'block';
+
+  // --- Final Score ---
+  const pct = total > 0 ? Math.round((correct/total)*100) : 0;
+  document.getElementById('scoreValue').textContent = pct;
+  document.getElementById('scoreDetail').innerHTML =
+    `<b>Benar: ${correct} / ${total} soal</b><br>
+     JKK &nbsp;&nbsp;&nbsp;: ${Math.abs(userDebit-keyDebit)<1000 && Math.abs(userKredit-keyKredit)<1000
+        ? '<span style="color:#86efac">✔ Seimbang</span>'
+        : '<span style="color:#fca5a5">✗ Tidak seimbang</span>'}<br>
+     ARP &nbsp;&nbsp;: ${arpCorrect}/${arpTotal} baris benar
+       (2.1: ${r21.paneCorrect}/${r21.paneTotal} &nbsp;|&nbsp;
+        2.2: ${r22.paneCorrect}/${r22.paneTotal} &nbsp;|&nbsp;
+        2.3: ${r23.paneCorrect}/${r23.paneTotal})<br>
+     Rep. Letter: ${rlCorrect}/${rlTotal} field benar`;
+  document.getElementById('scoreBanner').style.display = 'flex';
+
+  // Auto-navigate to Tab 3 so user sees the score and key
+  switchTab(2, document.querySelectorAll('.tab-bar > .tab-btn')[2]);
+  document.getElementById('scoreBanner').scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+// ═══════════════════════════════════════════════════════
+//  PDF
+// ═══════════════════════════════════════════════════════
+function savePDF() {
+  // Validate before allowing PDF
+  const missing = validateAll();
+  if (!showValidation(missing)) return;
+  document.getElementById('p-name').textContent  = document.getElementById('studentName').value || '—';
+  document.getElementById('p-nim').textContent   = document.getElementById('studentNIM').value  || '—';
+  document.getElementById('p-class').textContent = document.getElementById('studentClass').value|| '—';
+  // Show all ARP panes & tab panes for print
+  document.querySelectorAll('.tab-pane').forEach(p => p.style.display='block');
+  for (let i=0;i<3;i++) document.getElementById('arpPane'+i).style.display='block';
+  document.querySelector('.print-header').style.display = 'block';
+  document.querySelector('.identity-print').style.display = 'block';
+  window.print();
+  setTimeout(() => {
+    document.querySelectorAll('.tab-pane').forEach((p,i) => {
+      p.style.display = i === getActiveTabIndex() ? 'block' : 'none';
+    });
+    switchARP(0); // restore ARP to first pane
+    document.querySelector('.print-header').style.display = 'none';
+    document.querySelector('.identity-print').style.display = 'none';
+  }, 600);
+}
+
+function getActiveTabIndex() {
+  const btns = document.querySelectorAll('.tab-bar > .tab-btn');
+  for (let i=0;i<btns.length;i++) if (btns[i].classList.contains('active')) return i;
+  return 0;
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+(function init() {
+  // JKK: 5 empty rows
+  for (let i=0;i<5;i++) addJKKRow();
+
+  // ARP tables: build with real data
+  buildARPTable('arp21Body', ARP21_DATA);
+  buildARPTable('arp22Body', ARP22_DATA);
+  buildARPTable('arp23Body', ARP23_DATA);
+})();
+</script>
+</body>
+</html>
